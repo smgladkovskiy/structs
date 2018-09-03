@@ -1,11 +1,10 @@
-package structs
+package nulls
 
 import (
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.teamc.io/teamc.io/calcifer/yubaba/tests"
 )
 
 func TestNewNullTime(t *testing.T) {
@@ -39,7 +38,7 @@ func TestNullTime_Scan(t *testing.T) {
 		var nullTime NullTime
 		err := nullTime.Scan(testCase["input"])
 
-		assert.Equal(t, tests.AssertHasErrors(t, err), testCase["err"].(bool))
+		assert.Equal(t, AssertHasErrors(t, err), testCase["err"].(bool))
 
 		switch testCase["input"].(type) {
 		case string:

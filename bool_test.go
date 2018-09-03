@@ -1,11 +1,10 @@
-package structs
+package nulls
 
 import (
 	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.teamc.io/teamc.io/calcifer/yubaba/tests"
 )
 
 func TestNewNullBool(t *testing.T) {
@@ -28,7 +27,7 @@ func TestNullBool_Value(t *testing.T) {
 	t.Run("Return bool value", func(t *testing.T) {
 		nullBool := NewNullBool(true)
 		value, err := nullBool.Value()
-		if !tests.AssertNoErrors(t, err) {
+		if !AssertNoErrors(t, err) {
 			t.FailNow()
 		}
 

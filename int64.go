@@ -1,14 +1,13 @@
-package structs
+package nulls
 
 import (
 	"database/sql/driver"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
-
-	"gitlab.teamc.io/teamc.io/calcifer/yubaba/support/logs"
 )
 
 // NullInt64 Реализация NullInt64
@@ -21,7 +20,7 @@ func NewNullInt64(v interface{}) *NullInt64 {
 	var ni NullInt64
 	err := ni.Scan(v)
 	if err != nil {
-		logs.Logger.Error(err)
+		log.Print(err)
 	}
 	return &ni
 }

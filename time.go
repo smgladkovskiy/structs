@@ -1,13 +1,12 @@
-package structs
+package nulls
 
 import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
-
-	"gitlab.teamc.io/teamc.io/calcifer/yubaba/support/logs"
 )
 
 type NullTime struct {
@@ -20,7 +19,7 @@ func NewNullTime(v interface{}) NullTime {
 	var nt NullTime
 	err := nt.Scan(v)
 	if err != nil {
-		logs.Logger.Error(err)
+		log.Print(err)
 	}
 	return nt
 }

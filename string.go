@@ -1,13 +1,12 @@
-package structs
+package nulls
 
 import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
-
-	"gitlab.teamc.io/teamc.io/calcifer/yubaba/support/logs"
 )
 
 // NullString Реализация NullString
@@ -26,7 +25,7 @@ func NewNullString(v interface{}) *NullString {
 	var n NullString
 	err := n.Scan(v)
 	if err != nil {
-		logs.Logger.Error(err)
+		log.Print(err)
 	}
 	return &n
 }
