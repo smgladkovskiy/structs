@@ -27,10 +27,9 @@ func NewNullTime(v interface{}) NullTime {
 // Scan implements the Scanner interface for NullTime
 func (nt *NullTime) Scan(value interface{}) error {
 	switch v := value.(type) {
-	// Разве такое может быть?
-	// case NullTime:
-	// 	*nt = v
-	// 	return nil
+	case NullTime:
+		*nt = v
+		return nil
 	case nil:
 		*nt = NullTime{Time: time.Time{}, Valid: false}
 		return nil
