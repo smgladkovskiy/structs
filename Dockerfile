@@ -1,5 +1,5 @@
 # Докерфайл для тестов
-FROM golang:alpine as build-env
+FROM golang:alpine
 MAINTAINER Sergey Gladkovskiy <smgladkovskiy@gmail.com>
 
 ARG DEP_VERSION="0.4.1"

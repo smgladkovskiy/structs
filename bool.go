@@ -1,4 +1,4 @@
-package nulls_git
+package nulls
 
 import (
 	"database/sql/driver"
@@ -16,9 +16,6 @@ type NullBool struct {
 func NewNullBool(v interface{}) *NullBool {
 	var nb NullBool
 	nb.Scan(v)
-	// if err != nil {
-	// 	logs.Logger.Error(err)
-	// }
 	return &nb
 }
 

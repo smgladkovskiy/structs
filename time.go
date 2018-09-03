@@ -1,4 +1,4 @@
-package nulls_git
+package nulls
 
 import (
 	"database/sql/driver"
@@ -27,9 +27,10 @@ func NewNullTime(v interface{}) NullTime {
 // Scan implements the Scanner interface for NullTime
 func (nt *NullTime) Scan(value interface{}) error {
 	switch v := value.(type) {
-	case NullTime:
-		*nt = v
-		return nil
+	// Разве такое может быть?
+	// case NullTime:
+	// 	*nt = v
+	// 	return nil
 	case nil:
 		*nt = NullTime{Time: time.Time{}, Valid: false}
 		return nil

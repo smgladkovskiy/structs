@@ -1,4 +1,4 @@
-package nulls_git
+package nulls
 
 import (
 	"testing"
@@ -38,13 +38,13 @@ func TestNullTime_Scan(t *testing.T) {
 		var nullTime NullTime
 		err := nullTime.Scan(testCase["input"])
 
-		assert.Equal(t, assert.Error(t, err), testCase["err"].(bool))
+		if testCase["err"].(bool) {
+			assert.Error(t, err)
+			break
+		}
 
 		switch testCase["input"].(type) {
 		case string:
-			if testCase["err"].(bool) {
-				break
-			}
 			assert.Equal(t, testCase["value"], nullTime.Time.Format(TimeFormat()), "[%v] value param for intput %+v: %+v", testCase["name"], testCase["input"], testCase["value"])
 		case *time.Time:
 			if testCase["valid"].(bool) {

@@ -1,4 +1,4 @@
-package nulls_git
+package nulls
 
 import (
 	"errors"
