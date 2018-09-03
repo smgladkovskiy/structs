@@ -27,7 +27,7 @@ func TestNullBool_Value(t *testing.T) {
 	t.Run("Return bool value", func(t *testing.T) {
 		nullBool := NewNullBool(true)
 		value, err := nullBool.Value()
-		if !AssertNoErrors(t, err) {
+		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
 

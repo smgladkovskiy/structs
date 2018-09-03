@@ -34,7 +34,7 @@ func (nt *NullTime) Scan(value interface{}) error {
 		*nt = NullTime{Time: time.Time{}, Valid: false}
 		return nil
 	case string:
-		t, err := time.Parse(TimeFormat, v)
+		t, err := time.Parse(TimeFormat(), v)
 		if err != nil {
 			*nt = NullTime{Time: time.Time{}, Valid: false}
 			return err
@@ -78,7 +78,7 @@ func (nt *NullTime) UnmarshalJSON(b []byte) (err error) {
 		nt.Time = time.Time{}
 		return
 	}
-	nt.Time, err = time.Parse(TimeFormat, s)
+	nt.Time, err = time.Parse(TimeFormat(), s)
 	if err == nil {
 		nt.Valid = true
 	}
@@ -87,7 +87,7 @@ func (nt *NullTime) UnmarshalJSON(b []byte) (err error) {
 
 func (nt NullTime) MarshalJSON() ([]byte, error) {
 	if nt.Valid {
-		return json.Marshal(nt.Time.Format(TimeFormat))
+		return json.Marshal(nt.Time.Format(TimeFormat()))
 	}
 
 	return nullString, nil

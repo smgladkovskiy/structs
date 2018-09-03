@@ -28,7 +28,7 @@ func TestNullTime_Scan(t *testing.T) {
 		{"name": "*time", "input": &ts, "value": ts, "valid": true, "err": false},
 		{"name": "zero time", "input": time.Time{}, "value": time.Time{}, "valid": false, "err": false},
 		{"name": "zero *time", "input": &time.Time{}, "value": time.Time{}, "valid": false, "err": false},
-		{"name": "string good format", "input": ts.Format(TimeFormat), "value": ts.Format(TimeFormat), "valid": true, "err": false},
+		{"name": "string good format", "input": ts.Format(TimeFormat()), "value": ts.Format(TimeFormat()), "valid": true, "err": false},
 		{"name": "string bad format", "input": ts.Format(time.ANSIC), "value": time.Time{}, "valid": false, "err": true},
 		{"name": "nil", "input": nil, "value": time.Time{}, "valid": false, "err": false},
 		{"name": "NullTime", "input": NewNullTime(ts), "value": ts, "valid": true, "err": false},
@@ -38,14 +38,14 @@ func TestNullTime_Scan(t *testing.T) {
 		var nullTime NullTime
 		err := nullTime.Scan(testCase["input"])
 
-		assert.Equal(t, AssertHasErrors(t, err), testCase["err"].(bool))
+		assert.Equal(t, assert.Error(t, err), testCase["err"].(bool))
 
 		switch testCase["input"].(type) {
 		case string:
 			if testCase["err"].(bool) {
 				break
 			}
-			assert.Equal(t, testCase["value"], nullTime.Time.Format(TimeFormat), "[%v] value param for intput %+v: %+v", testCase["name"], testCase["input"], testCase["value"])
+			assert.Equal(t, testCase["value"], nullTime.Time.Format(TimeFormat()), "[%v] value param for intput %+v: %+v", testCase["name"], testCase["input"], testCase["value"])
 		case *time.Time:
 			if testCase["valid"].(bool) {
 				assert.Equal(t, testCase["value"], ts, "[%v] value param for intput %+v: %+v", testCase["name"], testCase["input"], testCase["value"])
@@ -78,7 +78,7 @@ func TestNullTime_Value(t *testing.T) {
 func TestNullTime_MarshalJSON(t *testing.T) {
 	t.Run("Success marshal", func(t *testing.T) {
 		ti := time.Now()
-		timeJson := `"` + ti.Format(TimeFormat) + `"`
+		timeJson := `"` + ti.Format(TimeFormat()) + `"`
 		nt := NewNullTime(ti)
 		jb, err := nt.MarshalJSON()
 		if !assert.NoError(t, err) {
@@ -102,7 +102,7 @@ func TestNullTime_MarshalJSON(t *testing.T) {
 func TestNullTime_UnmarshalJSON(t *testing.T) {
 	t.Run("Success unmarshal", func(t *testing.T) {
 		ti := "2018-07-24T10:09:53+03:00"
-		pt, _ := time.Parse(TimeFormat, ti)
+		pt, _ := time.Parse(TimeFormat(), ti)
 		var nt NullTime
 		err := nt.UnmarshalJSON([]byte(ti))
 		if !assert.NoError(t, err) {

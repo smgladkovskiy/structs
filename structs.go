@@ -6,7 +6,9 @@ import (
 )
 
 var (
-	TimeFormat = time.RFC3339
+	TimeFormat = func() string {
+		return time.RFC3339
+	}
 	nullString = []byte("null")
 	errNilPtr  = errors.New("destination pointer is nil") // embedded in descriptive error
 )

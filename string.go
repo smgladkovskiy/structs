@@ -67,10 +67,10 @@ func (ns *NullString) Scan(value interface{}) error {
 		}
 		return nil
 	case time.Time:
-		ns.String, ns.Valid = v.Format(TimeFormat), true
+		ns.String, ns.Valid = v.Format(TimeFormat()), true
 		return nil
 	case NullTime:
-		ns.String, ns.Valid = v.Time.Format(TimeFormat), true
+		ns.String, ns.Valid = v.Time.Format(TimeFormat()), true
 		return nil
 	}
 
