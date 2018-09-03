@@ -1,0 +1,9 @@
+stages:
+- test
+
+test:
+  stage: test
+  tags:
+    - docker
+  script:
+    - make test_in_docker
