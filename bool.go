@@ -3,8 +3,8 @@ package nulls
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -43,7 +43,7 @@ func (nb *NullBool) Scan(value interface{}) error {
 		// *nb = NullBool{Bool: false, Valid: false}
 		// return nil
 	case string:
-		b, err := strconv.ParseBool(v)
+		b, err := parseBool(v)
 		if err != nil {
 			*nb = NullBool{Bool: false, Valid: false}
 			return nil
@@ -143,4 +143,17 @@ func (ni *NullBool) UnmarshalJSON(b []byte) (err error) {
 
 	err = ni.Scan(s)
 	return
+}
+
+// ParseBool returns the boolean value represented by the string.
+// It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.
+// Any other value returns an error.
+func parseBool(str string) (bool, error) {
+	switch str {
+	case "1", "t", "T", "true", "TRUE", "True", "y", "Y", "YES", "Yes":
+		return true, nil
+	case "0", "f", "F", "false", "FALSE", "False", "n", "N", "NO", "No":
+		return false, nil
+	}
+	return false, errors.New(fmt.Sprintf("Error ParseBool from %s", str))
 }

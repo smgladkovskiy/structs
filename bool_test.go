@@ -66,6 +66,10 @@ func TestNullBool_Scan(t *testing.T) {
 		{"input": "true", "value": true, "valid": true},
 		{"input": "TRUE", "value": true, "valid": true},
 		{"input": "True", "value": true, "valid": true},
+		{"input": "y", "value": true, "valid": true},
+		{"input": "Y", "value": true, "valid": true},
+		{"input": "YES", "value": true, "valid": true},
+		{"input": "Yes", "value": true, "valid": true},
 
 		{"input": "0", "value": false, "valid": true},
 		{"input": "f", "value": false, "valid": true},
@@ -73,6 +77,10 @@ func TestNullBool_Scan(t *testing.T) {
 		{"input": "false", "value": false, "valid": true},
 		{"input": "False", "value": false, "valid": true},
 		{"input": "FALSE", "value": false, "valid": true},
+		{"input": "n", "value": false, "valid": true},
+		{"input": "N", "value": false, "valid": true},
+		{"input": "NO", "value": false, "valid": true},
+		{"input": "No", "value": false, "valid": true},
 
 		{"input": "some string", "value": false, "valid": false},
 
