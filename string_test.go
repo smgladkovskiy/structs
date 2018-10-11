@@ -157,6 +157,18 @@ func TestNullString_UnmarshalJSON(t *testing.T) {
 
 		assert.Equal(t, pt, ns.String)
 	})
+	t.Run("Success unmarshal unicode", func(t *testing.T) {
+		us := "Алексей"
+		usc := "\"\u0410\u043b\u0435\u043a\u0441\u0435\u0439\""
+		b := []byte(usc)
+		var ns NullString
+		err := ns.UnmarshalJSON(b)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+
+		assert.Equal(t, us, ns.String)
+	})
 	t.Run("Success unmarshal null", func(t *testing.T) {
 		s := "null"
 		var ns NullString

@@ -97,6 +97,7 @@ func (ns NullString) MarshalJSON() ([]byte, error) {
 // MarshalJSON correctly serializes a NullString to JSON
 func (ns *NullString) UnmarshalJSON(b []byte) (err error) {
 	s := strings.Trim(string(b), "\"")
+	_ = json.Unmarshal(b, &s)
 	// Ignore null, like in the main JSON package.
 	if s == "null" {
 		ns.String = ""
