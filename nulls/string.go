@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"gitlab.teamc.io/teamc.io/golang/structs"
 	"log"
 	"strings"
 	"time"
@@ -49,28 +50,28 @@ func (ns *NullString) Scan(value interface{}) error {
 		return nil
 	case []byte:
 		if v == nil {
-			return errNilPtr
+			return structs.ErrNilPtr
 		}
 
 		if string(v) != "" {
 			*ns = NullString{String: string(v), Valid: true}
 		}
 		return nil
-	case RawBytes:
+	case structs.RawBytes:
 		if v == nil {
-			return errNilPtr
+			return structs.ErrNilPtr
 		}
-		var d RawBytes
+		var d structs.RawBytes
 		ns.String = string(append((d)[:0], v...))
 		if ns.String != "" {
 			ns.Valid = true
 		}
 		return nil
 	case time.Time:
-		ns.String, ns.Valid = v.Format(TimeFormat()), true
+		ns.String, ns.Valid = v.Format(structs.TimeFormat()), true
 		return nil
 	case NullTime:
-		ns.String, ns.Valid = v.Time.Format(TimeFormat()), true
+		ns.String, ns.Valid = v.Time.Format(structs.TimeFormat()), true
 		return nil
 	}
 
@@ -91,7 +92,7 @@ func (ns NullString) MarshalJSON() ([]byte, error) {
 		return json.Marshal(ns.String)
 	}
 
-	return nullString, nil
+	return structs.NullString, nil
 }
 
 // MarshalJSON correctly serializes a NullString to JSON

@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"gitlab.teamc.io/teamc.io/golang/structs"
 	"log"
 	"strconv"
 	"strings"
@@ -85,7 +86,7 @@ func (ni NullInt64) MarshalJSON() ([]byte, error) {
 	if ni.Valid {
 		return json.Marshal(ni.Int64)
 	}
-	return nullString, nil
+	return structs.NullString, nil
 }
 
 func (ni *NullInt64) UnmarshalJSON(b []byte) (err error) {

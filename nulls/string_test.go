@@ -2,6 +2,7 @@ package nulls
 
 import (
 	"fmt"
+	"gitlab.teamc.io/teamc.io/golang/structs"
 	"testing"
 	"time"
 
@@ -67,7 +68,7 @@ func TestNullString_Scan(t *testing.T) {
 	t.Run("raw bytes", func(t *testing.T) {
 		var ns NullString
 		s := "string"
-		b := RawBytes(s)
+		b := structs.RawBytes(s)
 		ns.Scan(b)
 		assert.True(t, ns.Valid)
 		assert.Equal(t, s, ns.String)
@@ -75,7 +76,7 @@ func TestNullString_Scan(t *testing.T) {
 
 	t.Run("nil raw bytes error", func(t *testing.T) {
 		var ns NullString
-		b := RawBytes(nil)
+		b := structs.RawBytes(nil)
 		ns.Scan(b)
 		assert.False(t, ns.Valid)
 		assert.Equal(t, "", ns.String)
@@ -85,14 +86,14 @@ func TestNullString_Scan(t *testing.T) {
 		ti := time.Now()
 		ns.Scan(ti)
 		assert.True(t, ns.Valid)
-		assert.Equal(t, ti.Format(TimeFormat()), ns.String)
+		assert.Equal(t, ti.Format(structs.TimeFormat()), ns.String)
 	})
 	t.Run("NullTime", func(t *testing.T) {
 		var ns NullString
 		nt := NewNullTime(time.Now())
 		ns.Scan(nt)
 		assert.True(t, ns.Valid)
-		assert.Equal(t, nt.Time.Format(TimeFormat()), ns.String)
+		assert.Equal(t, nt.Time.Format(structs.TimeFormat()), ns.String)
 	})
 	t.Run("NullString", func(t *testing.T) {
 		var ns2 NullString

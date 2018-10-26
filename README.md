@@ -1,22 +1,30 @@
 nulls
 -----
 
-[![pipeline status](https://gitlab.teamc.io/teamc.io/golang/nulls/badges/master/pipeline.svg)](https://gitlab.teamc.io/teamc.io/golang/nulls/commits/master) [![coverage report](https://gitlab.teamc.io/teamc.io/golang/nulls/badges/master/coverage.svg)](https://gitlab.teamc.io/teamc.io/golang/nulls/commits/master)
+Структуры разных полезных типов
 
-Структуры nullable типов
+## Zero типы данных
 
-## Реализованные типы
+* date
+* time
+
+## Nullable типы
 
 * bool
+* date
 * int64
 * string
 * time
 
 ## Хелпер-функии и переменные
 
+### NewXXX(v interface{}) *XXX
+
+Инициирует новую переменную соответствующего типа, реализуя `Scan` метод на переданное значение.
+
 ### NewNullXXX(v interface{}) *NullXXX
 
-Инициирует новую nullable переменную из переданного значения, реализуя `Scan` метод. Доступно для всех типов
+Инициирует новую nullable переменную из переданного значения, реализуя `Scan` метод на переданное значение.
 
 ### NewNullXXXf(v interface{}) *NullXXX
 
@@ -24,16 +32,43 @@ nulls
 
 ### TimeFormat
 
-Для `NullTime` имеется возможность передать формат времени, в котором и из которого будет делаться (Un)MarshallJSON.
+Для `Time`, `NullTime` имеется возможность передать формат времени, в котором и из которого будет делаться (Un)MarshallJSON.
 
-Чтобы переопределить default формат (`time.RFC3339`), нужно переопределить переменную `nulls.TimeFormat` в приложении на уровне конфигурации приложения:
+Чтобы переопределить default формат (`time.RFC3339`), нужно переопределить переменную `stucts.TimeFormat` в приложении на уровне конфигурации приложения:
+
 
 ```go
-import "gitlab.teamc.io/teamc.io/golang/nulls.git"
+package main
+
+import (
+	"gitlab.teamc.io/teamc.io/golang/structs"
+	"time"
+)
+
+func main() {
+	structs.TimeFormat = func() string {
+		return time.RFC1123
+	}
+}
+```
+
+### DateFormat
+
+Для `Date`, `NullDate` имеется возможность передать формат даты, в котором и из которого будет делаться (Un)MarshallJSON.
+
+Чтобы переопределить default формат (`YYYY-MM-DD`), нужно переопределить переменную `stucts.DateFormat` в приложении на уровне конфигурации приложения:
+
+
+```go
+package main
+
+import (
+	"gitlab.teamc.io/teamc.io/golang/structs"
+)
 
 func init() {
-    nulls.TimeFormat = func() string {
-    	return time.RFC1123
-    }
+	structs.DateFormat = func() string {
+		return "02.01.2006"
+	}
 }
 ```
