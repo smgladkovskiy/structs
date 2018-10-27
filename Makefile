@@ -1,4 +1,4 @@
-IMAGE = rg.teamc.io/teamc.io/golang/nulls
+IMAGE = github.com/smgladkovskiy/go-structs
 TEST_CONTAINER = docker run --rm -i --name nulls_test $(IMAGE):test
 
 deps: ## Get and update dependencies

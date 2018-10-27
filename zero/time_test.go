@@ -2,7 +2,7 @@ package zero
 
 import (
 	"encoding/json"
-	"gitlab.teamc.io/teamc.io/golang/structs"
+	"github.com/smgladkovskiy/go-structs"
 	"testing"
 	"time"
 

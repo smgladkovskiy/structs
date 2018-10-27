@@ -1,14 +1,14 @@
-nulls
------
+go-structs
+----------
 
-Структуры разных полезных типов
+Various helpful golang structs package
 
-## Zero типы данных
+## Zero types
 
 * date
 * time
 
-## Nullable типы
+## Nullable types
 
 * bool
 * date
@@ -16,32 +16,33 @@ nulls
 * string
 * time
 
-## Хелпер-функии и переменные
+## Helper functions and variables
 
 ### NewXXX(v interface{}) *XXX
 
-Инициирует новую переменную соответствующего типа, реализуя `Scan` метод на переданное значение.
+Initiates new value of XXX type, using `Scan` method with passed value.
 
 ### NewNullXXX(v interface{}) *NullXXX
 
-Инициирует новую nullable переменную из переданного значения, реализуя `Scan` метод на переданное значение.
+Initiates new nullable value of XXX type, using `Scan` method with passed value.
 
-### NewNullXXXf(v interface{}) *NullXXX
+### NewNullXXXf(format string, a ...interface{}) *NullXXX
 
-Инициирует `NullString` переменную из переданного значения. Доступно только для строк.
+Initiates new `NullString` type value for passed format string and format variables. Available for strings.
 
 ### TimeFormat
 
-Для `Time`, `NullTime` имеется возможность передать формат времени, в котором и из которого будет делаться (Un)MarshallJSON.
+There is an opportunity for `Time` and `NullTime` types to set time format witch will be used with (Un)MarshallJSON methods.
 
-Чтобы переопределить default формат (`time.RFC3339`), нужно переопределить переменную `stucts.TimeFormat` в приложении на уровне конфигурации приложения:
+To override default package format for time (`time.RFC3339`), there must be an `stucts.TimeFormat` function 
+overriding in your app at the configuration or init level:
 
 
 ```go
 package main
 
 import (
-	"gitlab.teamc.io/teamc.io/golang/structs"
+	"github.com/smgladkovskiy/go-structs"
 	"time"
 )
 
@@ -54,16 +55,16 @@ func main() {
 
 ### DateFormat
 
-Для `Date`, `NullDate` имеется возможность передать формат даты, в котором и из которого будет делаться (Un)MarshallJSON.
+For `Date` and `NullDate` types there is the same thing with format for (Un)MarshallJSON.
 
-Чтобы переопределить default формат (`YYYY-MM-DD`), нужно переопределить переменную `stucts.DateFormat` в приложении на уровне конфигурации приложения:
+Default package date format (`YYYY-MM-DD`) must be overridden with `stucts.DateFormat` function:
 
 
 ```go
 package main
 
 import (
-	"gitlab.teamc.io/teamc.io/golang/structs"
+	"github.com/smgladkovskiy/go-structs"
 )
 
 func init() {

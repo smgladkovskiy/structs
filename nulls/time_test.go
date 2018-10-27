@@ -1,7 +1,7 @@
 package nulls
 
 import (
-	"gitlab.teamc.io/teamc.io/golang/structs"
+	"github.com/smgladkovskiy/go-structs"
 	"testing"
 	"time"
 

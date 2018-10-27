@@ -4,7 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"gitlab.teamc.io/teamc.io/golang/structs"
+	"github.com/smgladkovskiy/go-structs"
 	"log"
 	"strings"
 	"time"

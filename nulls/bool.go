@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gitlab.teamc.io/teamc.io/golang/structs"
+	"github.com/smgladkovskiy/go-structs"
 	"strings"
 )
 
