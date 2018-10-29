@@ -53,7 +53,7 @@ func (ni *NullInt64) Scan(value interface{}) error {
 		}
 		i16, ok := v.(int16)
 		if ok {
-			ni.Int64, ni.Valid = int16(i16), true
+			ni.Int64, ni.Valid = int64(i16), true
 			return nil
 		}
 		i32, ok := v.(int32)
@@ -68,22 +68,22 @@ func (ni *NullInt64) Scan(value interface{}) error {
 		}
 		ui, ok := v.(uint)
 		if ok {
-			ni.Int64, ni.Valid = uint64(ui), true
-			return nil
-		}
-		ui32, ok := v.(uint32)
-		if ok {
-			ni.Int64, ni.Valid = uint64(ui32), true
+			ni.Int64, ni.Valid = int64(ui), true
 			return nil
 		}
 		ui16, ok := v.(uint16)
 		if ok {
-			ni.Int64, ni.Valid = uint64(ui16), true
+			ni.Int64, ni.Valid = int64(ui16), true
+			return nil
+		}
+		ui32, ok := v.(uint32)
+		if ok {
+			ni.Int64, ni.Valid = int64(ui32), true
 			return nil
 		}
 		ui64, ok := v.(uint64)
 		if ok {
-			ni.Int64, ni.Valid = ui64, true
+			ni.Int64, ni.Valid = int64(ui64), true
 			return nil
 		}
 	case []byte:
