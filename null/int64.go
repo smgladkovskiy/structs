@@ -41,7 +41,7 @@ func (ni *Int64) Scan(value interface{}) error {
 			ni.Valid = true
 		}
 		return err
-	case int, int32, int64:
+	case int, int16, int32, int64, uint, uint16, uint32, uint64:
 		if v == 0 {
 			ni.Int64 = 0
 			return nil
@@ -49,6 +49,11 @@ func (ni *Int64) Scan(value interface{}) error {
 		i, ok := v.(int)
 		if ok {
 			ni.Int64, ni.Valid = int64(i), true
+			return nil
+		}
+		i16, ok := v.(int16)
+		if ok {
+			ni.Int64, ni.Valid = int64(i16), true
 			return nil
 		}
 		i32, ok := v.(int32)
@@ -59,6 +64,26 @@ func (ni *Int64) Scan(value interface{}) error {
 		i64, ok := v.(int64)
 		if ok {
 			ni.Int64, ni.Valid = i64, true
+			return nil
+		}
+		ui, ok := v.(uint)
+		if ok {
+			ni.Int64, ni.Valid = int64(ui), true
+			return nil
+		}
+		ui16, ok := v.(uint16)
+		if ok {
+			ni.Int64, ni.Valid = int64(ui16), true
+			return nil
+		}
+		ui32, ok := v.(uint32)
+		if ok {
+			ni.Int64, ni.Valid = int64(ui32), true
+			return nil
+		}
+		ui64, ok := v.(uint64)
+		if ok {
+			ni.Int64, ni.Valid = int64(ui64), true
 			return nil
 		}
 	case []byte:
