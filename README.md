@@ -1,5 +1,5 @@
-go-structs
-----------
+structs
+-------
 
 Various helpful golang structs package
 
@@ -42,7 +42,7 @@ overriding in your app at the configuration or init level:
 package main
 
 import (
-	"github.com/smgladkovskiy/go-structs"
+	"github.com/smgladkovskiy/structs"
 	"time"
 )
 
@@ -64,7 +64,7 @@ Default package date format (`YYYY-MM-DD`) must be overridden with `stucts.DateF
 package main
 
 import (
-	"github.com/smgladkovskiy/go-structs"
+	"github.com/smgladkovskiy/structs"
 )
 
 func init() {

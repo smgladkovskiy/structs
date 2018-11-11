@@ -1,24 +1,24 @@
-package nulls
+package null
 
 import (
 	"database/sql/driver"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/smgladkovskiy/go-structs"
+	"github.com/smgladkovskiy/structs"
 	"log"
 	"strconv"
 	"strings"
 )
 
-// NullInt64 Реализация NullInt64
-type NullInt64 struct {
+// Int64 Реализация Int64
+type Int64 struct {
 	Int64 int64
 	Valid bool
 }
 
-func NewNullInt64(v interface{}) *NullInt64 {
-	var ni NullInt64
+func NewInt64(v interface{}) *Int64 {
+	var ni Int64
 	err := ni.Scan(v)
 	if err != nil {
 		log.Print(err)
@@ -26,7 +26,7 @@ func NewNullInt64(v interface{}) *NullInt64 {
 	return &ni
 }
 
-func (ni *NullInt64) Scan(value interface{}) error {
+func (ni *Int64) Scan(value interface{}) error {
 	if value == nil {
 		ni.Int64, ni.Valid = 0, false
 		return nil
@@ -65,31 +65,31 @@ func (ni *NullInt64) Scan(value interface{}) error {
 		i := int64(binary.BigEndian.Uint64(v))
 		ni.Int64, ni.Valid = i, i > 0
 		return nil
-	case NullInt64:
+	case Int64:
 		*ni = v
 		return nil
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.Value type %T into type %T", value, ni)
+	return fmt.Errorf("unsupported Scan, storing driver.va type %T into type %T", value, ni)
 }
 
-// Value implements the driver Valuer interface.
-func (ni NullInt64) Value() (driver.Value, error) {
+// va implements the driver Valuer interface.
+func (ni Int64) Value() (driver.Value, error) {
 	if !ni.Valid {
 		return nil, nil
 	}
 	return ni.Int64, nil
 }
 
-// MarshalJSON correctly serializes a NullInt64 to JSON
-func (ni NullInt64) MarshalJSON() ([]byte, error) {
+// MarshalJSON correctly serializes a Int64 to JSON
+func (ni Int64) MarshalJSON() ([]byte, error) {
 	if ni.Valid {
 		return json.Marshal(ni.Int64)
 	}
 	return structs.NullString, nil
 }
 
-func (ni *NullInt64) UnmarshalJSON(b []byte) (err error) {
+func (ni *Int64) UnmarshalJSON(b []byte) (err error) {
 	s := strings.Trim(string(b), "\"")
 	// Ignore null, like in the main JSON package.
 	if s == "null" {

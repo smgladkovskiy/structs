@@ -12,8 +12,8 @@ RUN apk update \
  && rm -rf /var/cache/apk/* \
  && rm -rf /tmp/*
 
-COPY . /go/src/gitlab.teamc.io/teamc.io/golang/nulls
+COPY . /go/src/github.com/smgladkovskiy/structs
 
-WORKDIR /go/src/gitlab.teamc.io/teamc.io/golang/nulls
+WORKDIR /go/src/github.com/smgladkovskiy/structs
 
 RUN make deps

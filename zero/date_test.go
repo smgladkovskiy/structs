@@ -1,7 +1,7 @@
 package zero
 
 import (
-	"github.com/smgladkovskiy/go-structs"
+	"github.com/smgladkovskiy/structs"
 	"testing"
 	"time"
 
@@ -27,34 +27,34 @@ func TestDate_Scan(t *testing.T) {
 		t.Parallel()
 		var nt Date
 		tn := time.Now()
-		nt.Scan(tn)
+		_ = nt.Scan(tn)
 		assert.Equal(t, tn, nt.Time)
 	})
 	t.Run("Scan zero Timestamp", func(t *testing.T) {
 		t.Parallel()
 		var nt Date
 		tn := time.Time{}
-		nt.Scan(tn)
+		_ = nt.Scan(tn)
 		assert.Equal(t, tn, nt.Time)
 	})
 	t.Run("Scan String", func(t *testing.T) {
 		t.Parallel()
 		var nt Date
 		tn := time.Now().Format(structs.DateFormat())
-		nt.Scan(tn)
+		_ = nt.Scan(tn)
 		assert.Equal(t, tn, nt.Time.Format(structs.DateFormat()))
 	})
 	t.Run("Scan String without expected format", func(t *testing.T) {
 		t.Parallel()
 		var nt Date
 		tn := time.Now().Format(time.ANSIC)
-		nt.Scan(tn)
+		_ = nt.Scan(tn)
 		assert.Equal(t, time.Time{}, nt.Time)
 	})
 	t.Run("Scan nil", func(t *testing.T) {
 		t.Parallel()
 		var nt Date
-		nt.Scan(nil)
+		_ = nt.Scan(nil)
 		assert.Equal(t, time.Time{}, nt.Time)
 	})
 	t.Run("Scan error", func(t *testing.T) {

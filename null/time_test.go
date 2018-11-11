@@ -1,7 +1,6 @@
-package zero
+package null
 
 import (
-	"encoding/json"
 	"github.com/smgladkovskiy/structs"
 	"testing"
 	"time"
@@ -12,12 +11,14 @@ import (
 func TestNewTime(t *testing.T) {
 	t.Run("success NewTime", func(t *testing.T) {
 		ts := time.Now()
-		tt := NewTime(ts)
-		assert.Equal(t, ts, tt.Time)
+		nt := NewTime(ts)
+		assert.True(t, nt.Valid)
+		assert.Equal(t, ts, nt.Time)
 	})
 	t.Run("error NewTime", func(t *testing.T) {
-		tt := NewTime(false)
-		assert.Equal(t, time.Time{}, tt.Time)
+		nt := NewTime(false)
+		assert.False(t, nt.Valid)
+		assert.Equal(t, time.Time{}, nt.Time)
 	})
 }
 
@@ -35,8 +36,8 @@ func TestTime_Scan(t *testing.T) {
 		{na: "error", in: false, va: time.Time{}, iv: false, ie: true},
 	}
 	for _, testCase := range cases {
-		var testTime Time
-		err := testTime.Scan(testCase[in])
+		var nullTime Time
+		err := nullTime.Scan(testCase[in])
 
 		if testCase[ie].(bool) {
 			assert.Error(t, err)
@@ -45,31 +46,33 @@ func TestTime_Scan(t *testing.T) {
 
 		switch testCase[in].(type) {
 		case string:
-			assert.Equal(t, testCase[va], testTime.Time.Format(structs.TimeFormat()), "[%v] value param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
+			assert.Equal(t, testCase[va], nullTime.Time.Format(structs.TimeFormat()), "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
 		case *time.Time:
 			if testCase[iv].(bool) {
-				assert.Equal(t, testCase[va], ts, "[%v] value param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
+				assert.Equal(t, testCase[va], ts, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
 			} else {
-				assert.Equal(t, testCase[va], time.Time{}, "[%v] value param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
+				assert.Equal(t, testCase[va], time.Time{}, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
 			}
 
 		default:
-			assert.Equal(t, testCase[va], testTime.Time, "[%v] value param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
+			assert.Equal(t, testCase[va], nullTime.Time, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
 		}
+
+		assert.Equal(t, testCase[iv], nullTime.Valid, "[%v] iv param for intput %+v: %+v", testCase[na], testCase[in], testCase[iv])
 	}
 }
 
 func TestTime_Value(t *testing.T) {
-	t.Run("Return value", func(t *testing.T) {
-		ti := time.Now().UTC()
+	t.Run("Return va", func(t *testing.T) {
+		ti := time.Now()
 		nt := NewTime(ti)
-		value := nt.Time
+		value, _ := nt.Value()
 		assert.Equal(t, ti, value)
 	})
-	t.Run("Return zero value", func(t *testing.T) {
+	t.Run("Return nil va", func(t *testing.T) {
 		var nt Time
 		value, _ := nt.Value()
-		assert.Equal(t, "0001-01-01T00:00:00Z", value)
+		assert.Nil(t, value)
 	})
 }
 
@@ -92,8 +95,8 @@ func TestTime_MarshalJSON(t *testing.T) {
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		result, _ := json.Marshal("0001-01-01T00:00:00Z")
-		assert.Equal(t, result, jb)
+
+		assert.Equal(t, []byte("null"), jb)
 	})
 }
 

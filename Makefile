@@ -1,4 +1,4 @@
-IMAGE = github.com/smgladkovskiy/go-structs
+IMAGE = github.com/smgladkovskiy/structs
 TEST_CONTAINER = docker run --rm -i --name nulls_test $(IMAGE):test
 
 deps: ## Get and update dependencies
