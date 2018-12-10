@@ -2,6 +2,7 @@ package null
 
 import (
 	"github.com/smgladkovskiy/structs"
+	"github.com/smgladkovskiy/structs/zero"
 	"testing"
 	"time"
 
@@ -24,42 +25,28 @@ func TestNewTime(t *testing.T) {
 
 func TestTime_Scan(t *testing.T) {
 	ts := time.Now()
-	cases := []map[string]interface{}{
-		{na: "time", in: ts, va: ts, iv: true, ie: false},
-		{na: "*time", in: &ts, va: ts, iv: true, ie: false},
-		{na: "zero time", in: time.Time{}, va: time.Time{}, iv: false, ie: false},
-		{na: "zero *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
-		{na: "string good format", in: ts.Format(structs.TimeFormat()), va: ts.Format(structs.TimeFormat()), iv: true, ie: false},
-		{na: "string bad format", in: ts.Format(time.ANSIC), va: time.Time{}, iv: false, ie: true},
-		{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
-		{na: "Time", in: NewTime(ts), va: ts, iv: true, ie: false},
-		{na: "error", in: false, va: time.Time{}, iv: false, ie: true},
+	cases := TestCases{
+		"time": {
+			{na: "time", in: ts, va: ts, iv: true, ie: false},
+			{na: "*time", in: &ts, va: ts, iv: true, ie: false},
+			{na: "zero *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
+		},
+		"zero|null time": {
+			{na: "zero time", in: zero.NewTime(time.Time{}), va: time.Time{}, iv: false, ie: false},
+			{na: "Time", in: NewTime(ts), va: ts, iv: true, ie: false},
+		},
+		"strings": {
+			{na: "string good format", in: ts.Format(structs.TimeFormat()), va: ts.Format(structs.TimeFormat()), iv: true, ie: false},
+		},
+		"nil": {
+			{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
+		},
+		"errors": {
+			{na: "bool as input", in: false, va: false, iv: false, ie: true},
+			{na: "bad format", in: ts.Format(time.ANSIC), va: ts, iv: false, ie: true},
+		},
 	}
-	for _, testCase := range cases {
-		var nullTime Time
-		err := nullTime.Scan(testCase[in])
-
-		if testCase[ie].(bool) {
-			assert.Error(t, err)
-			break
-		}
-
-		switch testCase[in].(type) {
-		case string:
-			assert.Equal(t, testCase[va], nullTime.Time.Format(structs.TimeFormat()), "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-		case *time.Time:
-			if testCase[iv].(bool) {
-				assert.Equal(t, testCase[va], ts, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-			} else {
-				assert.Equal(t, testCase[va], time.Time{}, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-			}
-
-		default:
-			assert.Equal(t, testCase[va], nullTime.Time, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-		}
-
-		assert.Equal(t, testCase[iv], nullTime.Valid, "[%v] iv param for intput %+v: %+v", testCase[na], testCase[in], testCase[iv])
-	}
+	checkCases(cases, t, Time{}, ts)
 }
 
 func TestTime_Value(t *testing.T) {

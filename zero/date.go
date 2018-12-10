@@ -3,7 +3,6 @@ package zero
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"github.com/smgladkovskiy/structs"
 	"log"
 	"strings"
@@ -49,7 +48,7 @@ func (d *Date) Scan(value interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.Value type %T into type %T", value, d)
+	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: d}
 }
 
 // Value implements the driver Valuer interface.

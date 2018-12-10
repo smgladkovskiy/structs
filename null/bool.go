@@ -115,7 +115,7 @@ func (nb *Bool) Scan(value interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.va type %T into type %T", value, nb)
+	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nb}
 }
 
 // va implements the driver Valuer interface.

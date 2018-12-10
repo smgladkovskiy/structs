@@ -3,7 +3,6 @@ package null
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"github.com/smgladkovskiy/structs"
 	"log"
 	"strings"
@@ -12,7 +11,7 @@ import (
 
 type Time struct {
 	Time  time.Time
-	Valid bool // iv is true if Time is not NULL
+	Valid bool // isValid is true if Time is not NULL
 }
 
 // NewTime Создание Time переменной
@@ -62,7 +61,7 @@ func (nt *Time) Scan(value interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.va type %T into type %T", value, nt)
+	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nt}
 }
 
 // va implements the driver Valuer interface.

@@ -3,7 +3,6 @@ package null
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"github.com/smgladkovskiy/structs"
 	"log"
 	"strings"
@@ -26,69 +25,69 @@ func NewDate(v interface{}) Date {
 }
 
 // Scan implements the Scanner interface for Date
-func (nt *Date) Scan(value interface{}) error {
+func (nd *Date) Scan(value interface{}) error {
 	switch v := value.(type) {
 	case Date:
-		*nt = v
+		*nd = v
 		return nil
 	case nil:
-		*nt = Date{Time: time.Time{}, Valid: false}
+		*nd = Date{Time: time.Time{}, Valid: false}
 		return nil
 	case string:
 		t, err := time.Parse(structs.DateFormat(), v)
 		if err != nil {
-			*nt = Date{Time: time.Time{}, Valid: false}
+			*nd = Date{Time: time.Time{}, Valid: false}
 			return err
 		}
-		*nt = Date{Time: t, Valid: true}
+		*nd = Date{Time: t, Valid: true}
 		return nil
 	case time.Time:
 		if v.IsZero() {
-			*nt = Date{Time: time.Time{}, Valid: false}
+			*nd = Date{Time: time.Time{}, Valid: false}
 			return nil
 		}
 
-		*nt = Date{Time: v, Valid: true}
+		*nd = Date{Time: v, Valid: true}
 
 		return nil
 	case *time.Time:
 		if v.IsZero() {
-			*nt = Date{Time: time.Time{}, Valid: false}
+			*nd = Date{Time: time.Time{}, Valid: false}
 			return nil
 		}
 
-		*nt = Date{Time: *v, Valid: true}
+		*nd = Date{Time: *v, Valid: true}
 
 		return nil
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.va type %T into type %T", value, nt)
+	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nd}
 }
 
 // va implements the driver Valuer interface.
-func (nt Date) Value() (driver.Value, error) {
-	if !nt.Valid {
+func (nd Date) Value() (driver.Value, error) {
+	if !nd.Valid {
 		return nil, nil
 	}
-	return nt.Time, nil
+	return nd.Time, nil
 }
 
-func (nt *Date) UnmarshalJSON(b []byte) (err error) {
+func (nd *Date) UnmarshalJSON(b []byte) (err error) {
 	s := strings.Trim(string(b), "\"")
 	if s == "null" {
-		nt.Time = time.Time{}
+		nd.Time = time.Time{}
 		return
 	}
-	nt.Time, err = time.Parse(structs.DateFormat(), s)
+	nd.Time, err = time.Parse(structs.DateFormat(), s)
 	if err == nil {
-		nt.Valid = true
+		nd.Valid = true
 	}
 	return
 }
 
-func (nt Date) MarshalJSON() ([]byte, error) {
-	if nt.Valid {
-		return json.Marshal(nt.Time.Format(structs.DateFormat()))
+func (nd Date) MarshalJSON() ([]byte, error) {
+	if nd.Valid {
+		return json.Marshal(nd.Time.Format(structs.DateFormat()))
 	}
 
 	return structs.NullString, nil

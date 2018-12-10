@@ -2,18 +2,19 @@
 FROM golang:alpine
 MAINTAINER Sergey Gladkovskiy <smgladkovskiy@gmail.com>
 
+ARG DEP_VERSION="0.4.1"
+ARG SRC="/go/src/github.com/smgladkovskiy/structs"
+
 RUN apk update \
  && apk add --no-cache \
     ca-certificates \
     curl \
-    git \
     make \
-    openssl \
+ && curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o /bin/dep \
+ && chmod +x /bin/dep \
  && rm -rf /var/cache/apk/* \
  && rm -rf /tmp/*
 
-COPY . /go/src/github.com/smgladkovskiy/structs
-
-WORKDIR /go/src/github.com/smgladkovskiy/structs
-
-RUN make deps
+WORKDIR ${SRC}
+COPY . ${SRC}
+RUN make all

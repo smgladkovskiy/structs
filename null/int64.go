@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"github.com/smgladkovskiy/structs"
 	"log"
 	"strconv"
@@ -41,7 +40,7 @@ func (ni *Int64) Scan(value interface{}) error {
 			ni.Valid = true
 		}
 		return err
-	case int, int16, int32, int64, uint, uint16, uint32, uint64:
+	case int, uint, int8, uint8, int16, uint16, int32, uint32, int64, uint64:
 		if v == 0 {
 			ni.Int64 = 0
 			return nil
@@ -51,24 +50,24 @@ func (ni *Int64) Scan(value interface{}) error {
 			ni.Int64, ni.Valid = int64(i), true
 			return nil
 		}
-		i16, ok := v.(int16)
-		if ok {
-			ni.Int64, ni.Valid = int64(i16), true
-			return nil
-		}
-		i32, ok := v.(int32)
-		if ok {
-			ni.Int64, ni.Valid = int64(i32), true
-			return nil
-		}
-		i64, ok := v.(int64)
-		if ok {
-			ni.Int64, ni.Valid = i64, true
-			return nil
-		}
 		ui, ok := v.(uint)
 		if ok {
 			ni.Int64, ni.Valid = int64(ui), true
+			return nil
+		}
+		i8, ok := v.(int8)
+		if ok {
+			ni.Int64, ni.Valid = int64(i8), true
+			return nil
+		}
+		ui8, ok := v.(uint8)
+		if ok {
+			ni.Int64, ni.Valid = int64(ui8), true
+			return nil
+		}
+		i16, ok := v.(int16)
+		if ok {
+			ni.Int64, ni.Valid = int64(i16), true
 			return nil
 		}
 		ui16, ok := v.(uint16)
@@ -76,9 +75,19 @@ func (ni *Int64) Scan(value interface{}) error {
 			ni.Int64, ni.Valid = int64(ui16), true
 			return nil
 		}
+		i32, ok := v.(int32)
+		if ok {
+			ni.Int64, ni.Valid = int64(i32), true
+			return nil
+		}
 		ui32, ok := v.(uint32)
 		if ok {
 			ni.Int64, ni.Valid = int64(ui32), true
+			return nil
+		}
+		i64, ok := v.(int64)
+		if ok {
+			ni.Int64, ni.Valid = i64, true
 			return nil
 		}
 		ui64, ok := v.(uint64)
@@ -95,7 +104,7 @@ func (ni *Int64) Scan(value interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.va type %T into type %T", value, ni)
+	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: ni}
 }
 
 // va implements the driver Valuer interface.
