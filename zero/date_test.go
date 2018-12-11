@@ -12,12 +12,18 @@ func TestNewDate(t *testing.T) {
 	t.Run("success NewDate", func(t *testing.T) {
 		t.Parallel()
 		ts := time.Now()
-		nt := NewDate(ts)
+		nt, err := NewDate(ts)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		assert.Equal(t, ts, nt.Time)
 	})
 	t.Run("error NewDate", func(t *testing.T) {
 		t.Parallel()
-		nt := NewDate(false)
+		nt, err := NewDate(false)
+		if !assert.Error(t, err) {
+			t.FailNow()
+		}
 		assert.Equal(t, time.Time{}, nt.Time)
 	})
 }
@@ -69,7 +75,10 @@ func TestDate_Value(t *testing.T) {
 	t.Run("Return value", func(t *testing.T) {
 		t.Parallel()
 		ti := time.Now()
-		nt := NewDate(ti)
+		nt, err := NewDate(ti)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		value, _ := nt.Value()
 		assert.Equal(t, ti.Format(structs.DateFormat()), value)
 	})

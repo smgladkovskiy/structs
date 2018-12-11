@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"github.com/smgladkovskiy/structs"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -16,13 +15,10 @@ type Int64 struct {
 	Valid bool
 }
 
-func NewInt64(v interface{}) *Int64 {
+func NewInt64(v interface{}) (*Int64, error) {
 	var ni Int64
 	err := ni.Scan(v)
-	if err != nil {
-		log.Print(err)
-	}
-	return &ni
+	return &ni, err
 }
 
 func (ni *Int64) Scan(value interface{}) error {
@@ -100,7 +96,10 @@ func (ni *Int64) Scan(value interface{}) error {
 		ni.Int64, ni.Valid = i, i > 0
 		return nil
 	case Int64:
-		*ni = v
+		ni.Int64, ni.Valid = v.Int64, v.Valid
+		return nil
+	case *Int64:
+		ni.Int64, ni.Valid = v.Int64, v.Valid
 		return nil
 	}
 

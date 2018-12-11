@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/smgladkovskiy/structs"
+	"github.com/smgladkovskiy/structs/decoder"
 	"strings"
 )
 
@@ -14,105 +15,61 @@ type Bool struct {
 	Valid bool
 }
 
-func NewBool(v interface{}) *Bool {
+func NewBool(v interface{}) (*Bool, error) {
 	var nb Bool
-	_ = nb.Scan(v)
-	return &nb
+	err := nb.Scan(v)
+	return &nb, err
 }
 
 // Scan implements the Scanner interface.
 func (nb *Bool) Scan(value interface{}) error {
-	if value == nil {
-		*nb = Bool{Bool: false, Valid: false}
-		return nil
-	}
-
 	switch v := value.(type) {
+	case nil:
+		return nil
 	case Bool:
-		*nb = v
+		nb.Bool, nb.Valid = v.Bool, v.Valid
+		return nil
+	case *Bool:
+		nb.Bool, nb.Valid = v.Bool, v.Valid
 		return nil
 	case bool:
-		*nb = Bool{Bool: v, Valid: true}
+		nb.Bool, nb.Valid = v, true
 		return nil
 	case []byte:
-		b, err := driver.Bool.ConvertValue(v)
-		if err == nil {
-			*nb = Bool{Bool: b.(bool), Valid: true}
-			return nil
+		var b bool
+		dec := &decoder.Decoder{}
+		dec.Length = len(v)
+		dec.Data = v
+		err := dec.DecodeBool(&b)
+		if err != nil {
+			return err
+		}
+		if dec.Err != nil {
+			return dec.Err
 		}
 
-		// *nb = Bool{Bool: false, iv: false}
-		// return nil
+		nb.Bool, nb.Valid = b, true
+		return nil
 	case string:
 		b, err := parseBool(v)
 		if err != nil {
-			*nb = Bool{Bool: false, Valid: false}
+			nb.Bool, nb.Valid = false, false
 			return nil
 		}
 
-		*nb = Bool{Bool: b, Valid: true}
+		nb.Bool, nb.Valid = b, true
 		return nil
-	case int, int8, int16, int32, int64:
-		i, ok := v.(int)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
+	case int, uint, int8, uint8, int16, uint16, int32, uint32, int64, uint64:
+		switch v {
+		case int(0), uint(0), int8(0), uint8(0), int16(0), uint16(0), int32(0), uint32(0), int64(0), uint64(0):
+			nb.Bool, nb.Valid = false, true
+		case int(1), uint(1), int8(1), uint8(1), int16(1), uint16(1), int32(1), uint32(1), int64(1), uint64(1):
+			nb.Bool, nb.Valid = true, true
+		default:
+			nb.Bool, nb.Valid = false, false
 		}
-		i8, ok := v.(int8)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i8 == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i8 == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
 
-			return nil
-		}
-		i16, ok := v.(int16)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i16 == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i16 == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
-		}
-		i32, ok := v.(int32)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i32 == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i32 == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
-		}
-		i64, ok := v.(int64)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i64 == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i64 == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
-		}
+		return nil
 	}
 
 	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nb}

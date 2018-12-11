@@ -12,57 +12,51 @@ import (
 func TestNewTime(t *testing.T) {
 	t.Run("success NewTime", func(t *testing.T) {
 		ts := time.Now()
-		tt := NewTime(ts)
+		tt, err := NewTime(ts)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		assert.Equal(t, ts, tt.Time)
 	})
 	t.Run("error NewTime", func(t *testing.T) {
-		tt := NewTime(false)
+		tt, err := NewTime(false)
+		if !assert.Error(t, err) {
+			t.FailNow()
+		}
 		assert.Equal(t, time.Time{}, tt.Time)
 	})
 }
 
 func TestTime_Scan(t *testing.T) {
 	ts := time.Now()
-	cases := []map[string]interface{}{
-		{na: "time", in: ts, va: ts, iv: true, ie: false},
-		{na: "*time", in: &ts, va: ts, iv: true, ie: false},
-		{na: "zero time", in: time.Time{}, va: time.Time{}, iv: false, ie: false},
-		{na: "zero *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
-		{na: "string good format", in: ts.Format(structs.TimeFormat()), va: ts.Format(structs.TimeFormat()), iv: true, ie: false},
-		{na: "string bad format", in: ts.Format(time.ANSIC), va: time.Time{}, iv: false, ie: true},
-		{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
-		{na: "Time", in: NewTime(ts), va: ts, iv: true, ie: false},
-		{na: "error", in: false, va: time.Time{}, iv: false, ie: true},
+	titn, _ := NewTime(ts)
+	cases := TestCases{
+		"time": {
+			{na: "time", in: ts, va: ts, iv: true, ie: false},
+			{na: "*time", in: &ts, va: ts, iv: true, ie: false},
+			{na: "zero time", in: time.Time{}, va: time.Time{}, iv: false, ie: false},
+			{na: "zero *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
+			{na: "string good format", in: ts.Format(structs.TimeFormat()), va: ts.Format(structs.TimeFormat()), iv: true, ie: false},
+			{na: "string bad format", in: ts.Format(time.ANSIC), va: time.Time{}, iv: false, ie: true},
+			{na: "Time", in: titn, va: ts, iv: true, ie: false},
+		},
+		"nil": {
+			{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
+		},
+		"error": {
+			{na: "error", in: false, va: time.Time{}, iv: false, ie: true},
+		},
 	}
-	for _, testCase := range cases {
-		var testTime Time
-		err := testTime.Scan(testCase[in])
-
-		if testCase[ie].(bool) {
-			assert.Error(t, err)
-			break
-		}
-
-		switch testCase[in].(type) {
-		case string:
-			assert.Equal(t, testCase[va], testTime.Time.Format(structs.TimeFormat()), "[%v] value param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-		case *time.Time:
-			if testCase[iv].(bool) {
-				assert.Equal(t, testCase[va], ts, "[%v] value param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-			} else {
-				assert.Equal(t, testCase[va], time.Time{}, "[%v] value param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-			}
-
-		default:
-			assert.Equal(t, testCase[va], testTime.Time, "[%v] value param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-		}
-	}
+	checkCases(cases, t, Time{}, ts)
 }
 
 func TestTime_Value(t *testing.T) {
 	t.Run("Return value", func(t *testing.T) {
 		ti := time.Now().UTC()
-		nt := NewTime(ti)
+		nt, err := NewTime(ti)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		value := nt.Time
 		assert.Equal(t, ti, value)
 	})
@@ -77,7 +71,10 @@ func TestTime_MarshalJSON(t *testing.T) {
 	t.Run("Success marshal", func(t *testing.T) {
 		ti := time.Now()
 		timeJson := `"` + ti.Format(structs.TimeFormat()) + `"`
-		nt := NewTime(ti)
+		nt, err := NewTime(ti)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := nt.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -87,7 +84,10 @@ func TestTime_MarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Null result", func(t *testing.T) {
-		nt := NewTime(nil)
+		nt, err := NewTime(nil)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := nt.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()

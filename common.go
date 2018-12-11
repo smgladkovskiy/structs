@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"database/sql/driver"
 	"errors"
 	"time"
 )
@@ -18,3 +19,10 @@ var (
 
 	ErrNilPtr = errors.New("destination pointer is nil") // embedded in descriptive error
 )
+
+type Nullable interface {
+	Scan(interface{}) error
+	Value() (driver.Value, error)
+	MarshalJSON() ([]byte, error)
+	UnmarshalJSON([]byte) error
+}

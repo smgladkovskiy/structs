@@ -3,8 +3,6 @@ package zero
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"log"
-	"strings"
 	"time"
 
 	"github.com/smgladkovskiy/structs"
@@ -15,34 +13,48 @@ type Time struct {
 }
 
 // NewNullTime Создание Time переменной
-func NewTime(v interface{}) Time {
+func NewTime(v interface{}) (*Time, error) {
 	var t Time
 	err := t.Scan(v)
-	if err != nil {
-		log.Print(err)
-	}
-	return t
+	return &t, err
 }
 
 // Scan implements the Scanner interface for NullTime
 func (t *Time) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
 	switch v := value.(type) {
 	case nil:
-		*t = Time{Time: time.Time{}}
 		return nil
 	case string:
 		pt, err := time.Parse(structs.TimeFormat(), v)
 		if err != nil {
-			*t = Time{Time: time.Time{}}
 			return err
 		}
-		*t = Time{Time: pt}
+		t.Time = pt
 		return nil
 	case time.Time:
 		if v.IsZero() {
-			*t = Time{Time: time.Time{}}
+			t.Time = time.Time{}
 			return nil
 		}
+		t.Time = v
+		return nil
+	case *time.Time:
+		if v.IsZero() {
+			t.Time = time.Time{}
+			return nil
+		}
+		t.Time = *v
+		return nil
+	case *Time:
+		if v.IsZero() {
+			t.Time = v.Time
+			return nil
+		}
+		t.Time = v.Time
 
 		*t = Time{Time: v}
 
@@ -65,18 +77,18 @@ func (t Time) Value() (driver.Value, error) {
 	return t.Time.Format(structs.TimeFormat()), nil
 }
 
-func (t *Time) UnmarshalJSON(b []byte) (err error) {
-	s := strings.Trim(string(b), "\"")
-	// Ignore null, like in the main JSON package.
-	if s == "null" {
-		t.Time = time.Time{}
-		return
-	}
-
-	t.Time, err = time.Parse(structs.TimeFormat(), s)
-	return
-}
-
 func (t Time) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.Time.Format(structs.TimeFormat()))
+}
+
+func (t *Time) UnmarshalJSON(b []byte) (err error) {
+	// s := strings.Trim(string(b), "\"")
+	// Ignore null, like in the main JSON package.
+	if string(b) == "null" {
+		t.Time = time.Time{}
+		return nil
+	}
+
+	t.Time, err = time.Parse(structs.TimeFormat(), string(b))
+	return
 }

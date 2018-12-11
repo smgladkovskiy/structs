@@ -11,12 +11,18 @@ import (
 func TestNewInt64(t *testing.T) {
 	t.Run("success NewInt64", func(t *testing.T) {
 		i := int64(1)
-		ni := NewInt64(i)
+		ni, err := NewInt64(i)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		assert.True(t, ni.Valid)
 		assert.Equal(t, i, ni.Int64)
 	})
 	t.Run("error NewTime", func(t *testing.T) {
-		ni := NewInt64(false)
+		ni, err := NewInt64(false)
+		if !assert.Error(t, err) {
+			t.FailNow()
+		}
 		assert.False(t, ni.Valid)
 		assert.Equal(t, int64(0), ni.Int64)
 	})
@@ -25,7 +31,10 @@ func TestNewInt64(t *testing.T) {
 func TestInt64_Value(t *testing.T) {
 	t.Run("Return va", func(t *testing.T) {
 		i := int64(1)
-		ni := NewInt64(i)
+		ni, err := NewInt64(i)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		value, _ := ni.Value()
 		assert.Equal(t, i, value)
 	})
@@ -75,10 +84,16 @@ func TestInt64_Scan(t *testing.T) {
 	})
 	t.Run("Int64", func(t *testing.T) {
 		var ni Int64
-		ni2 := *NewInt64(1)
-		_ = ni.Scan(ni2)
+		ni2, err := NewInt64(1)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+		err = ni.Scan(ni2)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		assert.True(t, ni.Valid)
-		assert.Equal(t, ni2, ni)
+		assert.Equal(t, ni2, &ni)
 	})
 	t.Run("byte", func(t *testing.T) {
 		var ni Int64
@@ -99,7 +114,10 @@ func TestInt64_Scan(t *testing.T) {
 
 func TestInt64_MarshalJSON(t *testing.T) {
 	t.Run("Success marshal", func(t *testing.T) {
-		ni := NewInt64(1)
+		ni, err := NewInt64(1)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		b, _ := json.Marshal(1)
 		jb, err := ni.MarshalJSON()
 		if !assert.NoError(t, err) {
@@ -110,7 +128,10 @@ func TestInt64_MarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Null result", func(t *testing.T) {
-		ni := NewInt64(nil)
+		ni, err := NewInt64(nil)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := ni.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()

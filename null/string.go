@@ -7,7 +7,6 @@ import (
 	"github.com/smgladkovskiy/structs/decoder"
 	"github.com/smgladkovskiy/structs/encoder"
 	"github.com/smgladkovskiy/structs/zero"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -20,18 +19,15 @@ type String struct {
 }
 
 // NewStringf Создание String переменной по текстовому формату с аргументами
-func NewStringf(format string, a ...interface{}) *String {
+func NewStringf(format string, a ...interface{}) (*String, error) {
 	return NewString(fmt.Sprintf(format, a...))
 }
 
 // NewString Создание String переменной
-func NewString(v interface{}) *String {
+func NewString(v interface{}) (*String, error) {
 	var n String
 	err := n.Scan(v)
-	if err != nil {
-		log.Print(err)
-	}
-	return &n
+	return &n, err
 }
 
 // Scan implements the Scanner interface.

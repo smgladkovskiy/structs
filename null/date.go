@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"github.com/smgladkovskiy/structs"
-	"log"
 	"strings"
 	"time"
 )
@@ -15,23 +14,16 @@ type Date struct {
 }
 
 // NewDate Создание Date переменной
-func NewDate(v interface{}) Date {
+func NewDate(v interface{}) (*Date, error) {
 	var nt Date
 	err := nt.Scan(v)
-	if err != nil {
-		log.Print(err)
-	}
-	return nt
+	return &nt, err
 }
 
 // Scan implements the Scanner interface for Date
 func (nd *Date) Scan(value interface{}) error {
 	switch v := value.(type) {
-	case Date:
-		*nd = v
-		return nil
 	case nil:
-		*nd = Date{Time: time.Time{}, Valid: false}
 		return nil
 	case string:
 		t, err := time.Parse(structs.DateFormat(), v)
@@ -39,7 +31,7 @@ func (nd *Date) Scan(value interface{}) error {
 			*nd = Date{Time: time.Time{}, Valid: false}
 			return err
 		}
-		*nd = Date{Time: t, Valid: true}
+		nd.Time, nd.Valid = t, true
 		return nil
 	case time.Time:
 		if v.IsZero() {
@@ -47,7 +39,7 @@ func (nd *Date) Scan(value interface{}) error {
 			return nil
 		}
 
-		*nd = Date{Time: v, Valid: true}
+		nd.Time, nd.Valid = v, true
 
 		return nil
 	case *time.Time:
@@ -56,7 +48,18 @@ func (nd *Date) Scan(value interface{}) error {
 			return nil
 		}
 
-		*nd = Date{Time: *v, Valid: true}
+		nd.Time, nd.Valid = *v, true
+
+		return nil
+	case Date:
+		*nd = v
+		return nil
+	case *Date:
+		if v.Time.IsZero() {
+			return nil
+		}
+
+		nd.Time, nd.Valid = v.Time, v.Valid
 
 		return nil
 	}

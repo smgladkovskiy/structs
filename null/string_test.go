@@ -3,6 +3,7 @@ package null
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"testing"
 )
 
@@ -23,25 +24,35 @@ func TestNewString(t *testing.T) {
 
 func BenchmarkNewString(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = NewString(i)
+		_, err := NewString(i)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func TestNewStringf(t *testing.T) {
 	f := "Some string by format: %s"
 	str := "good"
-	ns := NewStringf(f, str)
+	ns, err := NewStringf(f, str)
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
 	assert.True(t, ns.Valid)
 	assert.Equal(t, fmt.Sprintf(f, str), ns.String)
 }
 
 func BenchmarkNewStringf(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = NewStringf("string %d", i)
+		_, err := NewStringf("string %d", i)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func TestString_Scan(t *testing.T) {
+	nb, _ := NewBool(false)
 	cases := TestCases{
 		"integers": {
 			{in: int8(1), va: "1", iv: true, ie: false},
@@ -84,7 +95,7 @@ func TestString_Scan(t *testing.T) {
 		"errors": {
 			{in: true, va: false, iv: false, ie: true},
 			{in: false, va: false, iv: false, ie: true},
-			{in: *NewBool(false), va: false, iv: false, ie: true},
+			{in: nb, va: false, iv: false, ie: true},
 			{in: makeBytes(false), va: false, iv: false, ie: true},
 		},
 	}
@@ -95,14 +106,20 @@ func TestString_Scan(t *testing.T) {
 func BenchmarkString_Scan(b *testing.B) {
 	var ns String
 	for i := 0; i < b.N; i++ {
-		_ = ns.Scan(i)
+		err := ns.Scan(i)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func TestString_Value(t *testing.T) {
 	t.Run("Return value", func(t *testing.T) {
 		s := "string"
-		ns := NewString(s)
+		ns, err := NewString(s)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		value, _ := ns.Value()
 		assert.Equal(t, s, value)
 	})
@@ -114,16 +131,22 @@ func TestString_Value(t *testing.T) {
 }
 
 func BenchmarkString_Value(b *testing.B) {
-	ns := NewString("string")
+	ns, _ := NewString("string")
 	for i := 0; i < b.N; i++ {
-		_, _ = ns.Value()
+		_, err := ns.Value()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func TestString_MarshalJSON(t *testing.T) {
 	t.Run("Success marshal", func(t *testing.T) {
 		s := "string"
-		ns := NewString(s)
+		ns, err := NewString(s)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := ns.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -133,7 +156,10 @@ func TestString_MarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Null result", func(t *testing.T) {
-		ns := NewString(nil)
+		ns, err := NewString(nil)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := ns.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -144,9 +170,12 @@ func TestString_MarshalJSON(t *testing.T) {
 }
 
 func BenchmarkString_MarshalJSON(b *testing.B) {
-	ns := NewString("string")
+	ns, _ := NewString("string")
 	for i := 0; i < b.N; i++ {
-		_, _ = ns.MarshalJSON()
+		_, err := ns.MarshalJSON()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -192,7 +221,10 @@ func BenchmarkString_UnmarshalJSON(b *testing.B) {
 	bytes := []byte(usc)
 	var ns String
 	for i := 0; i < b.N; i++ {
-		_ = ns.UnmarshalJSON(bytes)
+		err := ns.UnmarshalJSON(bytes)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }
