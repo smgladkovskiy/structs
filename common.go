@@ -20,7 +20,7 @@ var (
 	ErrNilPtr = errors.New("destination pointer is nil") // embedded in descriptive error
 )
 
-type Nullable interface {
+type Structable interface {
 	Scan(interface{}) error
 	Value() (driver.Value, error)
 	MarshalJSON() ([]byte, error)

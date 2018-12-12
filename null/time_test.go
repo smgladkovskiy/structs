@@ -30,6 +30,16 @@ func TestNewTime(t *testing.T) {
 	})
 }
 
+func BenchmarkNewTime(b *testing.B) {
+	tn := time.Now()
+	for i := 0; i < b.N; i++ {
+		_, err := NewTime(tn.Add(time.Duration(i)))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestTime_Scan(t *testing.T) {
 	ts := time.Now()
 	nt, _ := NewTime(ts)
@@ -56,6 +66,17 @@ func TestTime_Scan(t *testing.T) {
 	checkCases(cases, t, Time{}, ts)
 }
 
+func BenchmarkTime_Scan(b *testing.B) {
+	var nt Time
+	tn := time.Now()
+	for i := 0; i < b.N; i++ {
+		err := nt.Scan(tn.Add(time.Duration(i)))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestTime_Value(t *testing.T) {
 	t.Run("Return va", func(t *testing.T) {
 		ti := time.Now()
@@ -71,6 +92,16 @@ func TestTime_Value(t *testing.T) {
 		value, _ := nt.Value()
 		assert.Nil(t, value)
 	})
+}
+
+func BenchmarkTime_Value(b *testing.B) {
+	nt, _ := NewTime(time.Now())
+	for i := 0; i < b.N; i++ {
+		_, err := nt.Value()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestTime_MarshalJSON(t *testing.T) {
