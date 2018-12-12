@@ -37,47 +37,36 @@ func (nt *Time) Scan(value interface{}) error {
 		nt.Time, nt.Valid = v.Time, true
 		return nil
 	case *zero.Time:
-		tn := time.Time{}
-		if v.Time == tn {
+		if v.IsZero() {
 			return nil
 		}
 		nt.Time, nt.Valid = v.Time, true
 		return nil
 	case nil:
-		*nt = Time{Time: time.Time{}, Valid: false}
 		return nil
 	case string:
-		t, err := time.Parse(structs.TimeFormat(), v)
-		if err != nil {
-			*nt = Time{Time: time.Time{}, Valid: false}
-			return err
-		}
-		*nt = Time{Time: t, Valid: true}
-		return nil
+		var err error
+		nt.Time, err = time.Parse(structs.TimeFormat(), v)
+		nt.Valid = err == nil
+		return err
 	case time.Time:
 		if v.IsZero() {
-			*nt = Time{Time: time.Time{}, Valid: false}
 			return nil
 		}
-
-		*nt = Time{Time: v, Valid: true}
-
+		nt.Time, nt.Valid = v, true
 		return nil
 	case *time.Time:
 		if v.IsZero() {
-			*nt = Time{Time: time.Time{}, Valid: false}
 			return nil
 		}
-
-		*nt = Time{Time: *v, Valid: true}
-
+		nt.Time, nt.Valid = *v, true
 		return nil
 	}
 
 	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nt}
 }
 
-// va implements the driver Valuer interface.
+// Value implements the driver Valuer interface.
 func (nt Time) Value() (driver.Value, error) {
 	if !nt.Valid {
 		return nil, nil

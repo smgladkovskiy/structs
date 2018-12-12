@@ -2,9 +2,8 @@ package null
 
 import (
 	"database/sql/driver"
-	"encoding/json"
+	"errors"
 	"github.com/smgladkovskiy/structs"
-	"strings"
 	"time"
 )
 
@@ -26,41 +25,27 @@ func (nd *Date) Scan(value interface{}) error {
 	case nil:
 		return nil
 	case string:
-		t, err := time.Parse(structs.DateFormat(), v)
-		if err != nil {
-			*nd = Date{Time: time.Time{}, Valid: false}
-			return err
-		}
-		nd.Time, nd.Valid = t, true
-		return nil
+		var err error
+		nd.Time, err = time.Parse(structs.DateFormat(), v)
+		nd.Valid = err == nil
+		return err
 	case time.Time:
 		if v.IsZero() {
-			*nd = Date{Time: time.Time{}, Valid: false}
 			return nil
 		}
-
 		nd.Time, nd.Valid = v, true
-
 		return nil
 	case *time.Time:
 		if v.IsZero() {
-			*nd = Date{Time: time.Time{}, Valid: false}
 			return nil
 		}
-
 		nd.Time, nd.Valid = *v, true
-
 		return nil
 	case Date:
-		*nd = v
+		nd.Time, nd.Valid = v.Time, v.Valid
 		return nil
 	case *Date:
-		if v.Time.IsZero() {
-			return nil
-		}
-
 		nd.Time, nd.Valid = v.Time, v.Valid
-
 		return nil
 	}
 
@@ -76,22 +61,27 @@ func (nd Date) Value() (driver.Value, error) {
 }
 
 func (nd *Date) UnmarshalJSON(b []byte) (err error) {
-	s := strings.Trim(string(b), "\"")
-	if s == "null" {
-		nd.Time = time.Time{}
+	if string(b) == "null" {
 		return
 	}
-	nd.Time, err = time.Parse(structs.DateFormat(), s)
-	if err == nil {
-		nd.Valid = true
-	}
+	nd.Time, err = time.Parse(structs.DateFormat(), string(b))
+	nd.Valid = err == nil
 	return
 }
 
 func (nd Date) MarshalJSON() ([]byte, error) {
-	if nd.Valid {
-		return json.Marshal(nd.Time.Format(structs.DateFormat()))
+	if !nd.Valid {
+		return structs.NullString, nil
+	}
+	if y := nd.Time.Year(); y < 0 || y >= 10000 {
+		// RFC 3339 is clear that years are 4 digits exactly.
+		// See golang.org/issue/4556#c15 for more discussion.
+		return nil, errors.New("Time.MarshalJSON: year outside of range [0,9999]")
 	}
 
-	return structs.NullString, nil
+	b := make([]byte, 0, len(structs.DateFormat())+2)
+	b = append(b, '"')
+	b = nd.Time.AppendFormat(b, structs.DateFormat())
+	b = append(b, '"')
+	return b, nil
 }

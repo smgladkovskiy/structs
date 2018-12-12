@@ -2,6 +2,7 @@ package null
 
 import (
 	"github.com/smgladkovskiy/structs"
+	"log"
 	"testing"
 	"time"
 
@@ -26,6 +27,16 @@ func TestNewDate(t *testing.T) {
 		assert.False(t, nd.Valid)
 		assert.Equal(t, time.Time{}, nd.Time)
 	})
+}
+
+func BenchmarkNewDate(b *testing.B) {
+	td := time.Now()
+	for i := 0; i < b.N; i++ {
+		_, err := NewDate(td.Add(time.Duration(i)))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestDate_Scan(t *testing.T) {
@@ -53,6 +64,17 @@ func TestDate_Scan(t *testing.T) {
 	checkCases(cases, t, Date{}, tn)
 }
 
+func BenchmarkDate_Scan(b *testing.B) {
+	var nd Date
+	tn := time.Now()
+	for i := 0; i < b.N; i++ {
+		err := nd.Scan(tn.Add(time.Duration(i)))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestDate_Value(t *testing.T) {
 	t.Run("Return va", func(t *testing.T) {
 		ti := time.Now()
@@ -68,6 +90,16 @@ func TestDate_Value(t *testing.T) {
 		value, _ := nd.Value()
 		assert.Nil(t, value)
 	})
+}
+
+func BenchmarkDate_Value(b *testing.B) {
+	nd, _ := NewDate(time.Now())
+	for i := 0; i < b.N; i++ {
+		_, err := nd.Value()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestDate_MarshalJSON(t *testing.T) {
@@ -98,6 +130,16 @@ func TestDate_MarshalJSON(t *testing.T) {
 
 		assert.Equal(t, []byte("null"), jb)
 	})
+}
+
+func BenchmarkDate_MarshalJSON(b *testing.B) {
+	nd, _ := NewDate(time.Now())
+	for i := 0; i < b.N; i++ {
+		_, err := nd.MarshalJSON()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestDate_UnmarshalJSON(t *testing.T) {
@@ -134,4 +176,16 @@ func TestDate_UnmarshalJSON(t *testing.T) {
 
 		assert.Equal(t, nd.Time, pt)
 	})
+}
+
+func BenchmarkDate_UnmarshalJSON(b *testing.B) {
+	ts := "2018-07-24"
+	bytes := []byte(ts)
+	var nd Date
+	for i := 0; i < b.N; i++ {
+		err := nd.UnmarshalJSON(bytes)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
