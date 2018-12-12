@@ -2,6 +2,7 @@ package null
 
 import (
 	"encoding/json"
+	"github.com/smgladkovskiy/structs/encoder"
 	"log"
 	"testing"
 
@@ -29,6 +30,16 @@ func TestNewBool(t *testing.T) {
 	})
 }
 
+func BenchmarkNewBool(b *testing.B) {
+	var nb Bool
+	for i := 0; i < b.N; i++ {
+		err := nb.Scan(i % 2)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestBool_Value(t *testing.T) {
 	t.Parallel()
 	t.Run("Return bool va", func(t *testing.T) {
@@ -49,6 +60,16 @@ func TestBool_Value(t *testing.T) {
 
 		assert.Nil(t, value)
 	})
+}
+
+func BenchmarkBool_Value(b *testing.B) {
+	nb, _ := NewBool(true)
+	for i := 0; i < b.N; i++ {
+		_, err := nb.Value()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestBool_Scan(t *testing.T) {
@@ -108,6 +129,8 @@ func TestBool_Scan(t *testing.T) {
 		"byte slice": {
 			{na: "bytes for true", in: makeBytes(true), va: true, iv: true, ie: false},
 			{na: "bytes for false", in: makeBytes(false), va: false, iv: true, ie: false},
+			{na: "bytes for true", in: encoder.StringToBytes("true"), va: true, iv: true, ie: false},
+			{na: "bytes for false", in: encoder.StringToBytes("false"), va: false, iv: true, ie: false},
 			{na: "bytes for nil", in: makeBytes(nil), va: false, iv: false, ie: false},
 		},
 		"nil": {
@@ -135,7 +158,7 @@ func TestBool_MarshalJSON(t *testing.T) {
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		b, _ := json.Marshal(true)
+		b, _ := json.Marshal("true")
 		jb, err := nullBool.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -169,40 +192,22 @@ func BenchmarkBool_MarshalJSON(b *testing.B) {
 }
 
 func TestBool_UnmarshalJSON(t *testing.T) {
-	cases := []map[string]interface{}{
-		{in: []byte("true"), va: true, iv: true},
-		{in: []byte("1"), va: true, iv: true},
-		{in: []byte("t"), va: true, iv: true},
-		{in: []byte("T"), va: true, iv: true},
-		{in: []byte("TRUE"), va: true, iv: true},
-		{in: []byte("True"), va: true, iv: true},
-
-		{in: []byte("0"), va: false, iv: true},
-		{in: []byte("f"), va: false, iv: true},
-		{in: []byte("F"), va: false, iv: true},
-		{in: []byte("false"), va: false, iv: true},
-		{in: []byte("False"), va: false, iv: true},
-		{in: []byte("FALSE"), va: false, iv: true},
-
-		{in: []byte("not bool"), va: false, iv: false},
-		{in: []byte("null"), va: false, iv: false},
+	cases := TestCases{
+		"bools": {
+			{in: makeBytes(true), va: true, iv: true, ie: false},
+			{in: makeBytes(false), va: false, iv: true, ie: false},
+			{in: encoder.StringToBytes("false"), va: false, iv: true, ie: false},
+			{in: encoder.StringToBytes("true"), va: true, iv: true, ie: false},
+		},
+		"error": {
+			{in: encoder.StringToBytes("t"), va: false, iv: false, ie: true},
+		},
 	}
-
-	for _, testCase := range cases {
-		var nullBool Bool
-		err := nullBool.UnmarshalJSON(testCase[in].([]byte))
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
-
-		assert.Equal(t, testCase[va], nullBool.Bool, "va param for intput %+v: %+v", testCase[in], testCase[va])
-		assert.Equal(t, testCase[iv], nullBool.Valid, "iv param for intput %+v: %+v", testCase[in], testCase[iv])
-	}
+	checkUnmarshalCases(t, cases, Bool{})
 }
 
 func BenchmarkBool_UnmarshalJSON(b *testing.B) {
-	bs := "\"true\""
-	bytes := []byte(bs)
+	bytes := makeBytes(true)
 	var nb Bool
 	for i := 0; i < b.N; i++ {
 		err := nb.UnmarshalJSON(bytes)

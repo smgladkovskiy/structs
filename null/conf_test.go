@@ -106,6 +106,29 @@ func checkCases(cases TestCases, t *testing.T, valType interface{}, args ...inte
 	}
 }
 
+func checkUnmarshalCases(t *testing.T, cases TestCases, valType interface{}, args ...interface{}) {
+	for block, tcs := range cases {
+		for _, testCase := range tcs {
+			caseName := testCase[na]
+			if caseName == nil {
+				caseName = string(testCase[in].([]byte))
+			}
+			switch valType.(type) {
+			case Bool:
+				var nb Bool
+				err := nb.UnmarshalJSON(testCase[in].([]byte))
+				if testCase[ie].(bool) {
+					assert.Error(t, err, errorForErrorMsg, block, caseName, testCase[in], testCase[va])
+					break
+				}
+
+				assert.Equal(t, testCase[va], nb.Bool, assertForValueMsg, block, caseName, testCase[in], testCase[va])
+				assert.Equal(t, testCase[iv], nb.Valid, assertForValidMsg, block, caseName, testCase[in], testCase[iv])
+			}
+		}
+	}
+}
+
 func makeBytes(v interface{}) []byte {
 	bytes, _ := json.Marshal(v)
 	return bytes

@@ -3,7 +3,7 @@ package decoder
 func (dec *Decoder) DecodeBool(v *bool) error {
 	for ; dec.cursor < dec.Length || dec.read(); dec.cursor++ {
 		switch dec.Data[dec.cursor] {
-		case ' ', '\n', '\t', '\r', ',':
+		case ' ', '\n', '\t', '\r', ',', '"':
 			continue
 		case 't':
 			dec.cursor++
@@ -51,7 +51,7 @@ func (dec *Decoder) assertTrue() error {
 			}
 		case 3:
 			switch dec.Data[dec.cursor] {
-			case ' ', '\b', '\t', '\n', ',', ']', '}':
+			case ' ', '\b', '\t', '\n', ',', ']', '}', '"':
 				// dec.cursor--
 				return nil
 			default:
@@ -142,7 +142,7 @@ func (dec *Decoder) assertFalse() error {
 			}
 		case 4:
 			switch dec.Data[dec.cursor] {
-			case ' ', '\t', '\n', ',', ']', '}':
+			case ' ', '\t', '\n', ',', ']', '}', '"':
 				// dec.cursor--
 				return nil
 			default:

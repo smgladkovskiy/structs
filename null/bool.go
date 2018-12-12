@@ -2,12 +2,9 @@ package null
 
 import (
 	"database/sql/driver"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/smgladkovskiy/structs"
 	"github.com/smgladkovskiy/structs/decoder"
-	"strings"
+	"github.com/smgladkovskiy/structs/encoder"
 )
 
 type Bool struct {
@@ -36,29 +33,12 @@ func (nb *Bool) Scan(value interface{}) error {
 		nb.Bool, nb.Valid = v, true
 		return nil
 	case []byte:
-		var b bool
-		dec := &decoder.Decoder{}
-		dec.Length = len(v)
-		dec.Data = v
-		err := dec.DecodeBool(&b)
-		if err != nil {
-			return err
-		}
-		if dec.Err != nil {
-			return dec.Err
-		}
-
-		nb.Bool, nb.Valid = b, true
-		return nil
+		return nb.UnmarshalJSON(v)
 	case string:
-		b, err := parseBool(v)
-		if err != nil {
-			nb.Bool, nb.Valid = false, false
-			return nil
-		}
-
-		nb.Bool, nb.Valid = b, true
-		return nil
+		var err error
+		nb.Bool, err = parseBool(v)
+		nb.Valid = err == nil
+		return err
 	case int, uint, int8, uint8, int16, uint16, int32, uint32, int64, uint64:
 		switch v {
 		case int(0), uint(0), int8(0), uint8(0), int16(0), uint16(0), int32(0), uint32(0), int64(0), uint64(0):
@@ -85,22 +65,32 @@ func (nb Bool) Value() (driver.Value, error) {
 
 // MarshalJSON correctly serializes a Bool to JSON
 func (nb Bool) MarshalJSON() ([]byte, error) {
-	if nb.Valid {
-		return json.Marshal(nb.Bool)
+	if !nb.Valid {
+		return structs.NullString, nil
 	}
-	return structs.NullString, nil
+
+	if nb.Bool {
+		return encoder.StringToBytes("true"), nil
+	}
+
+	return encoder.StringToBytes("false"), nil
 }
 
-func (nb *Bool) UnmarshalJSON(b []byte) (err error) {
-	s := strings.Trim(string(b), "\"")
-	// Ignore null, like in the main JSON package.
-	if s == "null" {
-		nb.Bool = false
-		return
+func (nb *Bool) UnmarshalJSON(b []byte) error {
+	var bo bool
+	dec := &decoder.Decoder{}
+	dec.Length = len(b)
+	dec.Data = b
+	err := dec.DecodeBool(&bo)
+	if err != nil {
+		return err
+	}
+	if dec.Err != nil {
+		return dec.Err
 	}
 
-	err = nb.Scan(s)
-	return
+	nb.Bool, nb.Valid = bo, true
+	return nil
 }
 
 // ParseBool returns the boolean va represented by the string.
@@ -113,5 +103,5 @@ func parseBool(str string) (bool, error) {
 	case "0", "f", "F", "false", "FALSE", "False", "na", "N", "NO", "No":
 		return false, nil
 	}
-	return false, errors.New(fmt.Sprintf("Error ParseBool from %s", str))
+	return false, structs.ValueIsNotAcceptable{CheckedValue: str, CheckedType: Bool{}}
 }
