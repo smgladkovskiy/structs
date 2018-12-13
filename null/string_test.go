@@ -2,6 +2,7 @@ package null
 
 import (
 	"fmt"
+	"github.com/smgladkovskiy/structs/encoder"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
@@ -24,7 +25,7 @@ func TestNewString(t *testing.T) {
 
 func BenchmarkNewString(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := NewString(i)
+		_, err := NewString("some string")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -82,12 +83,12 @@ func TestString_Scan(t *testing.T) {
 			{in: String{"string", true}, va: "string", iv: true, ie: false},
 		},
 		"bytes slice": {
-			{in: makeBytes("string"), va: "string", iv: true, ie: false},
-			{in: makeBytes(""), va: "", iv: false, ie: false},
-			{in: makeBytes(1), va: "1", iv: true, ie: false},
-			{in: makeBytes(0), va: "0", iv: true, ie: false},
-			{in: makeBytes(-1), va: "-1", iv: true, ie: false},
+			{in: makeBytes(false), va: "", iv: false, ie: false},
 			{in: makeBytes(nil), va: "", iv: false, ie: false},
+			{in: makeBytes(1), va: "1", iv: true, ie: false},
+			{in: makeBytes(-1), va: "-1", iv: true, ie: false},
+			{in: encoder.StringToBytes("string"), va: "string", iv: true, ie: false},
+			{in: encoder.StringToBytes(""), va: "", iv: false, ie: false},
 		},
 		"nil": {
 			{in: nil, va: "", iv: false, ie: false},
@@ -96,7 +97,6 @@ func TestString_Scan(t *testing.T) {
 			{in: true, va: false, iv: false, ie: true},
 			{in: false, va: false, iv: false, ie: true},
 			{in: nb, va: false, iv: false, ie: true},
-			{in: makeBytes(false), va: false, iv: false, ie: true},
 		},
 	}
 

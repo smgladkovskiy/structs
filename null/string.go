@@ -8,7 +8,6 @@ import (
 	"github.com/smgladkovskiy/structs/encoder"
 	"github.com/smgladkovskiy/structs/zero"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -49,7 +48,9 @@ func (ns *String) Scan(value interface{}) error {
 			break
 		}
 		if v != nil && string(v) != "null" && string(v) != "" && string(v) != "\"\"" {
-			ns.String, ns.Valid = strings.Trim(string(v), "\""), true
+			es := trim(string(v), []byte{92, 34})
+			es = trim(es, []byte{34})
+			ns.String, ns.Valid = es, true
 		}
 		return nil
 	case structs.RawBytes:
@@ -144,7 +145,9 @@ func (ns String) MarshalJSON() ([]byte, error) {
 
 // MarshalJSON correctly serializes a String to JSON
 func (ns *String) UnmarshalJSON(b []byte) (err error) {
-	// s := strings.Trim(string(b), "\"")
+	if b == nil {
+		return
+	}
 
 	var str string
 	dec := &decoder.Decoder{}
@@ -157,10 +160,30 @@ func (ns *String) UnmarshalJSON(b []byte) (err error) {
 
 	// // Ignore null, like in the main JSON package.
 	if &str == nil {
-		ns.String = ""
 		return
 	}
 
 	ns.String, ns.Valid = str, err == nil
 	return
+}
+
+func trim(s1 string, s2 []byte) string {
+	s1l := len(s1)
+	s2l := len(s2)
+	low, high := 0, s1l
+	for i := 0; i < s1l-s2l; i++ {
+		if s1[i:i+s2l] == string(s2) {
+			low = i + s2l
+			break
+		}
+	}
+
+	for i := s1l - s2l; i > 0; i-- {
+		if s1[i:i+s2l] == string(s2) {
+			high = i
+			break
+		}
+	}
+
+	return s1[low:high]
 }

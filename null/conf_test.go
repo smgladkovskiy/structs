@@ -1,9 +1,9 @@
 package null
 
 import (
-	"encoding/json"
 	"github.com/smgladkovskiy/structs"
 	"github.com/stretchr/testify/assert"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -130,6 +130,20 @@ func checkUnmarshalCases(t *testing.T, cases TestCases, valType interface{}, arg
 }
 
 func makeBytes(v interface{}) []byte {
-	bytes, _ := json.Marshal(v)
-	return bytes
+	var b []byte
+	switch val := v.(type) {
+	case string:
+		b = append(b, val...)
+	case int:
+		b = strconv.AppendInt(b, int64(val), 10)
+	case int8:
+		b = strconv.AppendInt(b, int64(val), 10)
+	case int16:
+		b = strconv.AppendInt(b, int64(val), 10)
+	case int32:
+		b = strconv.AppendInt(b, int64(val), 10)
+	case int64:
+		b = strconv.AppendInt(b, int64(val), 10)
+	}
+	return b
 }
