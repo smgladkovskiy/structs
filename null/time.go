@@ -3,9 +3,10 @@ package null
 import (
 	"database/sql/driver"
 	"errors"
+	"time"
+
 	"github.com/smgladkovskiy/structs"
 	"github.com/smgladkovskiy/structs/zero"
-	"time"
 )
 
 type Time struct {
@@ -93,6 +94,7 @@ func (nt *Time) MarshalJSON() ([]byte, error) {
 
 func (nt *Time) UnmarshalJSON(b []byte) (err error) {
 	if string(b) == "null" {
+		nt.Valid = false
 		return
 	}
 	nt.Time, err = time.Parse(structs.TimeFormat(), string(b))

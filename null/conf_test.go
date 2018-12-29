@@ -1,11 +1,13 @@
 package null
 
 import (
-	"github.com/smgladkovskiy/structs"
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/smgladkovskiy/structs"
 )
 
 const (
@@ -43,6 +45,17 @@ func checkCases(cases TestCases, t *testing.T, valType interface{}, args ...inte
 
 				assert.Equal(t, testCase[va], ns.String, assertForValueMsg, block, caseName, testCase[in], testCase[va])
 				assert.Equal(t, testCase[iv], ns.Valid, assertForValidMsg, block, caseName, testCase[in], testCase[iv])
+			case Int64:
+				var ni Int64
+				err := ni.Scan(testCase[in])
+
+				if testCase[ie].(bool) {
+					assert.Error(t, err, errorForErrorMsg, block, caseName, testCase[in], testCase[va])
+					break
+				}
+
+				assert.Equal(t, testCase[va], ni.Int64, assertForValueMsg, block, caseName, testCase[in], testCase[va])
+				assert.Equal(t, testCase[iv], ni.Valid, assertForValidMsg, block, caseName, testCase[in], testCase[iv])
 			case Bool:
 				var nb Bool
 				err := nb.Scan(testCase[in])

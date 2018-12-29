@@ -2,9 +2,10 @@ package null
 
 import (
 	"encoding/json"
-	"github.com/smgladkovskiy/structs/encoder"
 	"log"
 	"testing"
+
+	"github.com/smgladkovskiy/structs/encoder"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -127,11 +128,11 @@ func TestBool_Scan(t *testing.T) {
 		},
 
 		"byte slice": {
-			{na: "bytes for true", in: makeBytes(true), va: true, iv: true, ie: false},
-			{na: "bytes for false", in: makeBytes(false), va: false, iv: true, ie: false},
+			{na: "bytes for true", in: []byte("true"), va: true, iv: true, ie: false},
+			{na: "bytes for false", in: []byte("false"), va: false, iv: true, ie: false},
 			{na: "bytes for true", in: encoder.StringToBytes("true"), va: true, iv: true, ie: false},
 			{na: "bytes for false", in: encoder.StringToBytes("false"), va: false, iv: true, ie: false},
-			{na: "bytes for nil", in: makeBytes(nil), va: false, iv: false, ie: false},
+			{na: "bytes for nil", in: []byte("null"), va: false, iv: false, ie: false},
 		},
 		"nil": {
 			{in: nil, va: false, iv: false, ie: false},
@@ -194,8 +195,8 @@ func BenchmarkBool_MarshalJSON(b *testing.B) {
 func TestBool_UnmarshalJSON(t *testing.T) {
 	cases := TestCases{
 		"bools": {
-			{in: makeBytes(true), va: true, iv: true, ie: false},
-			{in: makeBytes(false), va: false, iv: true, ie: false},
+			// {in: makeBytes(true), va: true, iv: true, ie: false},
+			// {in: makeBytes(false), va: false, iv: true, ie: false},
 			{in: encoder.StringToBytes("false"), va: false, iv: true, ie: false},
 			{in: encoder.StringToBytes("true"), va: true, iv: true, ie: false},
 		},
