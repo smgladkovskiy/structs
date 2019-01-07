@@ -3,11 +3,9 @@ package null
 import (
 	"encoding/binary"
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNewInt64(t *testing.T) {
@@ -144,15 +142,13 @@ func TestInt64_UnmarshalJSON(t *testing.T) {
 		assert.False(t, ni.Valid)
 		assert.Equal(t, int64(0), ni.Int64)
 	})
-	t.Run("Error wrong format", func(t *testing.T) {
-		ti := "2018-07-24"
-		pt := time.Time{}
-		var nt Time
-		err := nt.UnmarshalJSON([]byte(ti))
+	t.Run("Unexpected value case", func(t *testing.T) {
+		ti := "1.1"
+		var ni Int64
+		err := ni.UnmarshalJSON([]byte(ti))
 		if !assert.Error(t, err) {
 			t.FailNow()
 		}
-
-		assert.Equal(t, nt.Time, pt)
+		assert.False(t, ni.Valid)
 	})
 }
