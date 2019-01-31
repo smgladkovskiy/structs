@@ -4,10 +4,11 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"github.com/smgladkovskiy/structs"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/smgladkovskiy/structs"
 )
 
 type Time struct {
@@ -45,6 +46,14 @@ func (t *Time) Scan(value interface{}) error {
 		}
 
 		*t = Time{Time: v}
+
+		return nil
+	case Time:
+		*t = v
+
+		return nil
+	case *Time:
+		*t = *v
 
 		return nil
 	}
