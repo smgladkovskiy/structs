@@ -3,6 +3,7 @@ package zero
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/smgladkovskiy/structs"
@@ -82,13 +83,13 @@ func (t Time) MarshalJSON() ([]byte, error) {
 }
 
 func (t *Time) UnmarshalJSON(b []byte) (err error) {
-	// s := strings.Trim(string(b), "\"")
+	s := strings.Trim(string(b), "\"")
 	// Ignore null, like in the main JSON package.
-	if string(b) == "null" {
+	if s == "null" {
 		t.Time = time.Time{}
 		return nil
 	}
 
-	t.Time, err = time.Parse(structs.TimeFormat(), string(b))
+	t.Time, err = time.Parse(structs.TimeFormat(), s)
 	return
 }
