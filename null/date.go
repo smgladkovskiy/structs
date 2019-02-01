@@ -2,11 +2,8 @@ package null
 
 import (
 	"database/sql/driver"
-	"encoding/json"
-	"fmt"
+	"errors"
 	"github.com/smgladkovskiy/structs"
-	"log"
-	"strings"
 	"time"
 )
 
@@ -16,80 +13,75 @@ type Date struct {
 }
 
 // NewDate Создание Date переменной
-func NewDate(v interface{}) Date {
+func NewDate(v interface{}) (*Date, error) {
 	var nt Date
 	err := nt.Scan(v)
-	if err != nil {
-		log.Print(err)
-	}
-	return nt
+	return &nt, err
 }
 
 // Scan implements the Scanner interface for Date
-func (nt *Date) Scan(value interface{}) error {
+func (nd *Date) Scan(value interface{}) error {
 	switch v := value.(type) {
-	case Date:
-		*nt = v
-		return nil
 	case nil:
-		*nt = Date{Time: time.Time{}, Valid: false}
 		return nil
 	case string:
-		t, err := time.Parse(structs.DateFormat(), v)
-		if err != nil {
-			*nt = Date{Time: time.Time{}, Valid: false}
-			return err
-		}
-		*nt = Date{Time: t, Valid: true}
-		return nil
+		var err error
+		nd.Time, err = time.Parse(structs.DateFormat(), v)
+		nd.Valid = err == nil
+		return err
 	case time.Time:
 		if v.IsZero() {
-			*nt = Date{Time: time.Time{}, Valid: false}
 			return nil
 		}
-
-		*nt = Date{Time: v, Valid: true}
-
+		nd.Time, nd.Valid = v, true
 		return nil
 	case *time.Time:
 		if v.IsZero() {
-			*nt = Date{Time: time.Time{}, Valid: false}
 			return nil
 		}
-
-		*nt = Date{Time: *v, Valid: true}
-
+		nd.Time, nd.Valid = *v, true
+		return nil
+	case Date:
+		nd.Time, nd.Valid = v.Time, v.Valid
+		return nil
+	case *Date:
+		nd.Time, nd.Valid = v.Time, v.Valid
 		return nil
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.va type %T into type %T", value, nt)
+	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nd}
 }
 
 // va implements the driver Valuer interface.
-func (nt Date) Value() (driver.Value, error) {
-	if !nt.Valid {
+func (nd Date) Value() (driver.Value, error) {
+	if !nd.Valid {
 		return nil, nil
 	}
-	return nt.Time, nil
+	return nd.Time, nil
 }
 
-func (nt *Date) UnmarshalJSON(b []byte) (err error) {
-	s := strings.Trim(string(b), "\"")
-	if s == "null" {
-		nt.Time = time.Time{}
+func (nd *Date) UnmarshalJSON(b []byte) (err error) {
+	if string(b) == "null" {
 		return
 	}
-	nt.Time, err = time.Parse(structs.DateFormat(), s)
-	if err == nil {
-		nt.Valid = true
-	}
+	nd.Time, err = time.Parse(structs.DateFormat(), string(b))
+	nd.Valid = err == nil
 	return
 }
 
-func (nt Date) MarshalJSON() ([]byte, error) {
-	if nt.Valid {
-		return json.Marshal(nt.Time.Format(structs.DateFormat()))
+func (nd Date) MarshalJSON() ([]byte, error) {
+	if !nd.Valid {
+		return structs.NullString, nil
+	}
+	if y := nd.Time.Year(); y < 0 || y >= 10000 {
+		// RFC 3339 is clear that years are 4 digits exactly.
+		// See golang.org/issue/4556#c15 for more discussion.
+		return nil, errors.New("Time.MarshalJSON: year outside of range [0,9999]")
 	}
 
-	return structs.NullString, nil
+	b := make([]byte, 0, len(structs.DateFormat())+2)
+	b = append(b, '"')
+	b = nd.Time.AppendFormat(b, structs.DateFormat())
+	b = append(b, '"')
+	return b, nil
 }

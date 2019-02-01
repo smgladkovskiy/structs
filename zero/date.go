@@ -3,9 +3,7 @@ package zero
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"github.com/smgladkovskiy/structs"
-	"log"
 	"strings"
 	"time"
 )
@@ -15,13 +13,10 @@ type Date struct {
 }
 
 // NewNullTime Создание Date переменной
-func NewDate(v interface{}) Date {
+func NewDate(v interface{}) (*Date, error) {
 	var t Date
 	err := t.Scan(v)
-	if err != nil {
-		log.Print(err)
-	}
-	return t
+	return &t, err
 }
 
 // Scan implements the Scanner interface for NullTime
@@ -49,7 +44,7 @@ func (d *Date) Scan(value interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.Value type %T into type %T", value, d)
+	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: d}
 }
 
 // Value implements the driver Valuer interface.
@@ -57,18 +52,20 @@ func (d Date) Value() (driver.Value, error) {
 	return d.Time.Format(structs.DateFormat()), nil
 }
 
-func (d *Date) UnmarshalJSON(b []byte) (err error) {
+func (d Date) MarshalJSON() ([]byte, error) {
+
+	return json.Marshal(d.Time.Format(structs.DateFormat()))
+}
+
+func (d *Date) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")
 	// Ignore null, like in the main JSON package.
 	if s == "null" {
 		d.Time = time.Time{}
-		return
+		return nil
 	}
 
+	var err error
 	d.Time, err = time.Parse(structs.DateFormat(), s)
-	return
-}
-
-func (d Date) MarshalJSON() ([]byte, error) {
-	return json.Marshal(d.Time.Format(structs.DateFormat()))
+	return err
 }

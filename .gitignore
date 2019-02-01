@@ -1,2 +1,6 @@
 .idea
+vendor
 coverage.out
+*.prof
+*.svg
+*.test

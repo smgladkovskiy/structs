@@ -2,6 +2,7 @@ package null
 
 import (
 	"github.com/smgladkovskiy/structs"
+	"log"
 	"testing"
 	"time"
 
@@ -11,77 +12,105 @@ import (
 func TestNewDate(t *testing.T) {
 	t.Run("success NewDate", func(t *testing.T) {
 		ts := time.Now()
-		nt := NewDate(ts)
-		assert.True(t, nt.Valid)
-		assert.Equal(t, ts, nt.Time)
+		nd, err := NewDate(ts)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+		assert.True(t, nd.Valid)
+		assert.Equal(t, ts, nd.Time)
 	})
 	t.Run("error NewDate", func(t *testing.T) {
-		nt := NewDate(false)
-		assert.False(t, nt.Valid)
-		assert.Equal(t, time.Time{}, nt.Time)
+		nd, err := NewDate(false)
+		if !assert.Error(t, err) {
+			t.FailNow()
+		}
+		assert.False(t, nd.Valid)
+		assert.Equal(t, time.Time{}, nd.Time)
 	})
 }
 
-func TestDate_Scan(t *testing.T) {
-	ts := time.Now()
-	cases := []map[string]interface{}{
-		{na: "time", in: ts, va: ts, iv: true, ie: false},
-		{na: "*time", in: &ts, va: ts, iv: true, ie: false},
-		{na: "zero time", in: time.Time{}, va: time.Time{}, iv: false, ie: false},
-		{na: "zero *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
-		{na: "string good format", in: ts.Format(structs.DateFormat()), va: ts.Format(structs.DateFormat()), iv: true, ie: false},
-		{na: "string bad format", in: ts.Format(time.ANSIC), va: time.Time{}, iv: false, ie: true},
-		{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
-		{na: "Date", in: NewDate(ts), va: ts, iv: true, ie: false},
-		{na: "error", in: false, va: time.Time{}, iv: false, ie: true},
+func BenchmarkNewDate(b *testing.B) {
+	td := time.Now()
+	for i := 0; i < b.N; i++ {
+		_, err := NewDate(td.Add(time.Duration(i)))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-	for _, testCase := range cases {
-		var nullTime Date
-		err := nullTime.Scan(testCase[in])
+}
 
-		if testCase[ie].(bool) {
-			assert.Error(t, err)
-			break
+func TestDate_Scan(t *testing.T) {
+	tn := time.Now()
+	nd, _ := NewDate(tn)
+	cases := TestCases{
+		"times": {
+			{na: "time", in: tn, va: tn, iv: true, ie: false},
+			{na: "*time", in: &tn, va: tn, iv: true, ie: false},
+			{na: "zero time", in: time.Time{}, va: time.Time{}, iv: false, ie: false},
+			{na: "zero *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
+			{na: "Date", in: nd, va: tn, iv: true, ie: false},
+		},
+		"string": {
+			{na: "string good format", in: tn.Format(structs.DateFormat()), va: tn.Format(structs.DateFormat()), iv: true, ie: false},
+		},
+		"nil": {
+			{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
+		},
+		"error": {
+			{na: "string bad format", in: tn.Format(time.ANSIC), va: time.Time{}, iv: false, ie: true},
+			{na: "error", in: false, va: time.Time{}, iv: false, ie: true},
+		},
+	}
+	checkCases(cases, t, Date{}, tn)
+}
+
+func BenchmarkDate_Scan(b *testing.B) {
+	var nd Date
+	tn := time.Now()
+	for i := 0; i < b.N; i++ {
+		err := nd.Scan(tn.Add(time.Duration(i)))
+		if err != nil {
+			log.Fatal(err)
 		}
-
-		switch testCase[in].(type) {
-		case string:
-			assert.Equal(t, testCase[va], nullTime.Time.Format(structs.DateFormat()), "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-		case *time.Time:
-			if testCase[iv].(bool) {
-				assert.Equal(t, testCase[va], ts, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-			} else {
-				assert.Equal(t, testCase[va], time.Time{}, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-			}
-
-		default:
-			assert.Equal(t, testCase[va], nullTime.Time, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-		}
-
-		assert.Equal(t, testCase[iv], nullTime.Valid, "[%v] iv param for intput %+v: %+v", testCase[na], testCase[in], testCase[iv])
 	}
 }
 
 func TestDate_Value(t *testing.T) {
 	t.Run("Return va", func(t *testing.T) {
 		ti := time.Now()
-		nt := NewDate(ti)
-		value, _ := nt.Value()
+		nd, err := NewDate(ti)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+		value, _ := nd.Value()
 		assert.Equal(t, ti, value)
 	})
 	t.Run("Return nil va", func(t *testing.T) {
-		var nt Date
-		value, _ := nt.Value()
+		var nd Date
+		value, _ := nd.Value()
 		assert.Nil(t, value)
 	})
+}
+
+func BenchmarkDate_Value(b *testing.B) {
+	nd, _ := NewDate(time.Now())
+	for i := 0; i < b.N; i++ {
+		_, err := nd.Value()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestDate_MarshalJSON(t *testing.T) {
 	t.Run("Success marshal", func(t *testing.T) {
 		ti := time.Now()
 		timeJson := `"` + ti.Format(structs.DateFormat()) + `"`
-		nt := NewDate(ti)
-		jb, err := nt.MarshalJSON()
+		nd, err := NewDate(ti)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+		jb, err := nd.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
@@ -90,8 +119,11 @@ func TestDate_MarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Null result", func(t *testing.T) {
-		nt := NewDate(nil)
-		jb, err := nt.MarshalJSON()
+		nd, err := NewDate(nil)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+		jb, err := nd.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
@@ -100,38 +132,60 @@ func TestDate_MarshalJSON(t *testing.T) {
 	})
 }
 
+func BenchmarkDate_MarshalJSON(b *testing.B) {
+	nd, _ := NewDate(time.Now())
+	for i := 0; i < b.N; i++ {
+		_, err := nd.MarshalJSON()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestDate_UnmarshalJSON(t *testing.T) {
 	t.Run("Success unmarshal", func(t *testing.T) {
 		ti := "2018-07-24"
 		pt, _ := time.Parse(structs.DateFormat(), ti)
-		var nt Date
-		err := nt.UnmarshalJSON([]byte(ti))
+		var nd Date
+		err := nd.UnmarshalJSON([]byte(ti))
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
 
-		assert.Equal(t, nt.Time, pt)
+		assert.Equal(t, nd.Time, pt)
 	})
 	t.Run("Success unmarshal null", func(t *testing.T) {
 		ti := "null"
 		pt := time.Time{}
-		var nt Date
-		err := nt.UnmarshalJSON([]byte(ti))
+		var nd Date
+		err := nd.UnmarshalJSON([]byte(ti))
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
 
-		assert.Equal(t, nt.Time, pt)
+		assert.Equal(t, nd.Time, pt)
 	})
 	t.Run("Error wrong format", func(t *testing.T) {
 		ti := "2018/07/24"
 		pt := time.Time{}
-		var nt Date
-		err := nt.UnmarshalJSON([]byte(ti))
+		var nd Date
+		err := nd.UnmarshalJSON([]byte(ti))
 		if !assert.Error(t, err) {
 			t.FailNow()
 		}
 
-		assert.Equal(t, nt.Time, pt)
+		assert.Equal(t, nd.Time, pt)
 	})
+}
+
+func BenchmarkDate_UnmarshalJSON(b *testing.B) {
+	ts := "2018-07-24"
+	bytes := []byte(ts)
+	var nd Date
+	for i := 0; i < b.N; i++ {
+		err := nd.UnmarshalJSON(bytes)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }

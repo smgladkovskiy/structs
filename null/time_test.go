@@ -2,6 +2,8 @@ package null
 
 import (
 	"github.com/smgladkovskiy/structs"
+	"github.com/smgladkovskiy/structs/zero"
+	"log"
 	"testing"
 	"time"
 
@@ -11,61 +13,77 @@ import (
 func TestNewTime(t *testing.T) {
 	t.Run("success NewTime", func(t *testing.T) {
 		ts := time.Now()
-		nt := NewTime(ts)
+		nt, err := NewTime(ts)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		assert.True(t, nt.Valid)
 		assert.Equal(t, ts, nt.Time)
 	})
 	t.Run("error NewTime", func(t *testing.T) {
-		nt := NewTime(false)
+		nt, err := NewTime(false)
+		if !assert.Error(t, err) {
+			t.FailNow()
+		}
 		assert.False(t, nt.Valid)
 		assert.Equal(t, time.Time{}, nt.Time)
 	})
 }
 
+func BenchmarkNewTime(b *testing.B) {
+	tn := time.Now()
+	for i := 0; i < b.N; i++ {
+		_, err := NewTime(tn.Add(time.Duration(i)))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestTime_Scan(t *testing.T) {
 	ts := time.Now()
-	cases := []map[string]interface{}{
-		{na: "time", in: ts, va: ts, iv: true, ie: false},
-		{na: "*time", in: &ts, va: ts, iv: true, ie: false},
-		{na: "zero time", in: time.Time{}, va: time.Time{}, iv: false, ie: false},
-		{na: "zero *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
-		{na: "string good format", in: ts.Format(structs.TimeFormat()), va: ts.Format(structs.TimeFormat()), iv: true, ie: false},
-		{na: "string bad format", in: ts.Format(time.ANSIC), va: time.Time{}, iv: false, ie: true},
-		{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
-		{na: "Time", in: NewTime(ts), va: ts, iv: true, ie: false},
-		{na: "error", in: false, va: time.Time{}, iv: false, ie: true},
+	nt, _ := NewTime(ts)
+	ztn, _ := zero.NewTime(time.Time{})
+	cases := TestCases{
+		"time": {
+			{na: "time", in: ts, va: ts, iv: true, ie: false},
+			{na: "*time", in: &ts, va: ts, iv: true, ie: false},
+			{na: "empty *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
+			{na: "zero.Time", in: ztn, va: time.Time{}, iv: false, ie: false},
+			{na: "null.Time now", in: nt, va: ts, iv: true, ie: false},
+		},
+		"strings": {
+			{na: "string good format", in: ts.Format(structs.TimeFormat()), va: ts.Format(structs.TimeFormat()), iv: true, ie: false},
+		},
+		"nil": {
+			{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
+		},
+		"errors": {
+			{na: "bool as input", in: false, va: false, iv: false, ie: true},
+			{na: "bad format", in: ts.Format(time.ANSIC), va: ts, iv: false, ie: true},
+		},
 	}
-	for _, testCase := range cases {
-		var nullTime Time
-		err := nullTime.Scan(testCase[in])
+	checkCases(cases, t, Time{}, ts)
+}
 
-		if testCase[ie].(bool) {
-			assert.Error(t, err)
-			break
+func BenchmarkTime_Scan(b *testing.B) {
+	var nt Time
+	tn := time.Now()
+	for i := 0; i < b.N; i++ {
+		err := nt.Scan(tn.Add(time.Duration(i)))
+		if err != nil {
+			log.Fatal(err)
 		}
-
-		switch testCase[in].(type) {
-		case string:
-			assert.Equal(t, testCase[va], nullTime.Time.Format(structs.TimeFormat()), "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-		case *time.Time:
-			if testCase[iv].(bool) {
-				assert.Equal(t, testCase[va], ts, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-			} else {
-				assert.Equal(t, testCase[va], time.Time{}, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-			}
-
-		default:
-			assert.Equal(t, testCase[va], nullTime.Time, "[%v] va param for intput %+v: %+v", testCase[na], testCase[in], testCase[va])
-		}
-
-		assert.Equal(t, testCase[iv], nullTime.Valid, "[%v] iv param for intput %+v: %+v", testCase[na], testCase[in], testCase[iv])
 	}
 }
 
 func TestTime_Value(t *testing.T) {
 	t.Run("Return va", func(t *testing.T) {
 		ti := time.Now()
-		nt := NewTime(ti)
+		nt, err := NewTime(ti)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		value, _ := nt.Value()
 		assert.Equal(t, ti, value)
 	})
@@ -76,11 +94,24 @@ func TestTime_Value(t *testing.T) {
 	})
 }
 
+func BenchmarkTime_Value(b *testing.B) {
+	nt, _ := NewTime(time.Now())
+	for i := 0; i < b.N; i++ {
+		_, err := nt.Value()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestTime_MarshalJSON(t *testing.T) {
 	t.Run("Success marshal", func(t *testing.T) {
 		ti := time.Now()
 		timeJson := `"` + ti.Format(structs.TimeFormat()) + `"`
-		nt := NewTime(ti)
+		nt, err := NewTime(ti)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := nt.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -90,7 +121,10 @@ func TestTime_MarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Null result", func(t *testing.T) {
-		nt := NewTime(nil)
+		nt, err := NewTime(nil)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := nt.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -98,6 +132,16 @@ func TestTime_MarshalJSON(t *testing.T) {
 
 		assert.Equal(t, []byte("null"), jb)
 	})
+}
+
+func BenchmarkTime_MarshalJSON(b *testing.B) {
+	nt, _ := NewTime(time.Now())
+	for i := 0; i < b.N; i++ {
+		_, err := nt.MarshalJSON()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestTime_UnmarshalJSON(t *testing.T) {
@@ -134,4 +178,16 @@ func TestTime_UnmarshalJSON(t *testing.T) {
 
 		assert.Equal(t, nt.Time, pt)
 	})
+}
+
+func BenchmarkTime_UnmarshalJSON(b *testing.B) {
+	ts := "2018-07-24T10:09:53+03:00"
+	bytes := []byte(ts)
+	var nt Time
+	for i := 0; i < b.N; i++ {
+		err := nt.UnmarshalJSON(bytes)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }

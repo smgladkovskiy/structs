@@ -2,131 +2,153 @@ package null
 
 import (
 	"fmt"
-	"github.com/smgladkovskiy/structs"
+	"log"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/smgladkovskiy/structs/encoder"
 )
 
 func TestNewString(t *testing.T) {
-	t.Run("string", func(t *testing.T) {
-		str := "Some string"
-		ns := NewString(str)
-		assert.True(t, ns.Valid)
-		assert.Equal(t, str, ns.String)
-	})
-	t.Run("nil", func(t *testing.T) {
-		ns := NewString(nil)
-		assert.False(t, ns.Valid)
-		assert.Equal(t, "", ns.String)
-	})
-	t.Run("false", func(t *testing.T) {
-		ns := NewString(false)
-		assert.False(t, ns.Valid)
-		assert.Equal(t, "", ns.String)
-	})
+	cases := TestCases{
+		"good": {
+			{in: "string", va: "string", iv: true, ie: false},
+		},
+		"bad": {
+			{in: true, va: false, iv: false, ie: true},
+		},
+		"nil": {
+			{in: nil, va: "", iv: false, ie: false},
+		},
+	}
+	checkCases(cases, t, String{})
+}
+
+func BenchmarkNewString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, err := NewString("some string")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestNewStringf(t *testing.T) {
 	f := "Some string by format: %s"
 	str := "good"
-	ns := NewStringf(f, str)
+	ns, err := NewStringf(f, str)
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
 	assert.True(t, ns.Valid)
 	assert.Equal(t, fmt.Sprintf(f, str), ns.String)
 }
 
-func TestString_Scan(t *testing.T) {
-	t.Run("String", func(t *testing.T) {
-		var ns String
-		s := "string"
-		_ = ns.Scan(s)
-		assert.True(t, ns.Valid)
-		assert.Equal(t, s, ns.String)
-	})
-	t.Run("nil", func(t *testing.T) {
-		var ns String
-		_ = ns.Scan(nil)
-		assert.False(t, ns.Valid)
-		assert.Equal(t, "", ns.String)
-	})
-	t.Run("bytes", func(t *testing.T) {
-		var ns String
-		s := "string"
-		b := []byte(s)
-		_ = ns.Scan(b)
-		assert.True(t, ns.Valid)
-		assert.Equal(t, s, ns.String)
-	})
-	t.Run("nil bytes error", func(t *testing.T) {
-		var ns String
-		b := []byte(nil)
-		_ = ns.Scan(b)
-		assert.False(t, ns.Valid)
-		assert.Equal(t, "", ns.String)
-	})
-	t.Run("raw bytes", func(t *testing.T) {
-		var ns String
-		s := "string"
-		b := structs.RawBytes(s)
-		_ = ns.Scan(b)
-		assert.True(t, ns.Valid)
-		assert.Equal(t, s, ns.String)
-	})
+func BenchmarkNewStringf(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, err := NewStringf("string %d", i)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
 
-	t.Run("nil raw bytes error", func(t *testing.T) {
-		var ns String
-		b := structs.RawBytes(nil)
-		_ = ns.Scan(b)
-		assert.False(t, ns.Valid)
-		assert.Equal(t, "", ns.String)
-	})
-	t.Run("Time", func(t *testing.T) {
-		var ns String
-		ti := time.Now()
-		_ = ns.Scan(ti)
-		assert.True(t, ns.Valid)
-		assert.Equal(t, ti.Format(structs.TimeFormat()), ns.String)
-	})
-	t.Run("Time", func(t *testing.T) {
-		var ns String
-		nt := NewTime(time.Now())
-		_ = ns.Scan(nt)
-		assert.True(t, ns.Valid)
-		assert.Equal(t, nt.Time.Format(structs.TimeFormat()), ns.String)
-	})
-	t.Run("String", func(t *testing.T) {
-		var ns2 String
-		ns1 := String{"string", true}
-		_ = ns2.Scan(ns1)
-		assert.True(t, ns2.Valid)
-		assert.Equal(t, ns1, ns2)
-	})
-	t.Run("error", func(t *testing.T) {
-		var ns String
-		err := ns.Scan(false)
-		assert.Error(t, err)
-	})
+func TestString_Scan(t *testing.T) {
+	nb, _ := NewBool(false)
+	cases := TestCases{
+		"integers": {
+			{in: int8(1), va: "1", iv: true, ie: false},
+			{in: uint8(1), va: "1", iv: true, ie: false},
+			{in: int16(1), va: "1", iv: true, ie: false},
+			{in: uint16(1), va: "1", iv: true, ie: false},
+			{in: int32(1), va: "1", iv: true, ie: false},
+			{in: uint32(1), va: "1", iv: true, ie: false},
+			{in: int64(1), va: "1", iv: true, ie: false},
+			{in: uint64(1), va: "1", iv: true, ie: false},
+			{in: int8(0), va: "0", iv: true, ie: false},
+			{in: uint8(0), va: "0", iv: true, ie: false},
+			{in: int16(0), va: "0", iv: true, ie: false},
+			{in: uint16(0), va: "0", iv: true, ie: false},
+			{in: int32(0), va: "0", iv: true, ie: false},
+			{in: uint32(0), va: "0", iv: true, ie: false},
+			{in: int64(0), va: "0", iv: true, ie: false},
+			{in: uint64(0), va: "0", iv: true, ie: false},
+			{in: int8(-1), va: "-1", iv: true, ie: false},
+			{in: int16(-1), va: "-1", iv: true, ie: false},
+			{in: int32(-1), va: "-1", iv: true, ie: false},
+			{in: int64(-1), va: "-1", iv: true, ie: false},
+		},
+		"strings": {
+			{in: "string", va: "string", iv: true, ie: false},
+			{in: "", va: "", iv: false, ie: false},
+			{in: String{"string", true}, va: "string", iv: true, ie: false},
+		},
+		"bytes slice": {
+			{in: makeBytes(false), va: "", iv: false, ie: false},
+			{in: makeBytes(nil), va: "", iv: false, ie: false},
+			{in: makeBytes(1), va: "1", iv: true, ie: false},
+			{in: makeBytes(-1), va: "-1", iv: true, ie: false},
+			{in: encoder.StringToBytes("string"), va: "string", iv: true, ie: false},
+			{in: encoder.StringToBytes(""), va: "", iv: false, ie: false},
+		},
+		"nil": {
+			{in: nil, va: "", iv: false, ie: false},
+		},
+		"errors": {
+			{in: true, va: false, iv: false, ie: true},
+			{in: false, va: false, iv: false, ie: true},
+			{in: nb, va: false, iv: false, ie: true},
+		},
+	}
+
+	checkCases(cases, t, String{})
+}
+
+func BenchmarkString_Scan(b *testing.B) {
+	var ns String
+	for i := 0; i < b.N; i++ {
+		err := ns.Scan(i)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func TestString_Value(t *testing.T) {
-	t.Run("Return va", func(t *testing.T) {
+	t.Run("Return value", func(t *testing.T) {
 		s := "string"
-		ns := NewString(s)
+		ns, err := NewString(s)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		value, _ := ns.Value()
 		assert.Equal(t, s, value)
 	})
-	t.Run("Return nil va", func(t *testing.T) {
+	t.Run("Return nil value", func(t *testing.T) {
 		var ns String
 		value, _ := ns.Value()
 		assert.Nil(t, value)
 	})
 }
 
+func BenchmarkString_Value(b *testing.B) {
+	ns, _ := NewString("string")
+	for i := 0; i < b.N; i++ {
+		_, err := ns.Value()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestString_MarshalJSON(t *testing.T) {
 	t.Run("Success marshal", func(t *testing.T) {
 		s := "string"
-		ns := NewString(s)
+		ns, err := NewString(s)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := ns.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -136,7 +158,10 @@ func TestString_MarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Null result", func(t *testing.T) {
-		ns := NewString(nil)
+		ns, err := NewString(nil)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		jb, err := ns.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -146,10 +171,21 @@ func TestString_MarshalJSON(t *testing.T) {
 	})
 }
 
+func BenchmarkString_MarshalJSON(b *testing.B) {
+	ns, _ := NewString("string")
+	for i := 0; i < b.N; i++ {
+		_, err := ns.MarshalJSON()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func TestString_UnmarshalJSON(t *testing.T) {
 	t.Run("Success unmarshal", func(t *testing.T) {
 		pt := "04231"
-		b := []byte(pt)
+		escapedString := "\"" + pt + "\""
+		b := []byte(escapedString)
 		var ns String
 		err := ns.UnmarshalJSON(b)
 		if !assert.NoError(t, err) {
@@ -180,4 +216,17 @@ func TestString_UnmarshalJSON(t *testing.T) {
 
 		assert.Equal(t, ns.String, "")
 	})
+}
+
+func BenchmarkString_UnmarshalJSON(b *testing.B) {
+	usc := "\"\u0410\u043b\u0435\u043a\u0441\u0435\u0439\""
+	bytes := []byte(usc)
+	var ns String
+	for i := 0; i < b.N; i++ {
+		err := ns.UnmarshalJSON(bytes)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }

@@ -2,11 +2,9 @@ package null
 
 import (
 	"database/sql/driver"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/smgladkovskiy/structs"
-	"strings"
+	"github.com/smgladkovskiy/structs/decoder"
+	"github.com/smgladkovskiy/structs/encoder"
 )
 
 type Bool struct {
@@ -14,108 +12,47 @@ type Bool struct {
 	Valid bool
 }
 
-func NewBool(v interface{}) *Bool {
+func NewBool(v interface{}) (*Bool, error) {
 	var nb Bool
-	_ = nb.Scan(v)
-	return &nb
+	err := nb.Scan(v)
+	return &nb, err
 }
 
 // Scan implements the Scanner interface.
 func (nb *Bool) Scan(value interface{}) error {
-	if value == nil {
-		*nb = Bool{Bool: false, Valid: false}
-		return nil
-	}
-
 	switch v := value.(type) {
+	case nil:
+		return nil
 	case Bool:
-		*nb = v
+		nb.Bool, nb.Valid = v.Bool, v.Valid
+		return nil
+	case *Bool:
+		nb.Bool, nb.Valid = v.Bool, v.Valid
 		return nil
 	case bool:
-		*nb = Bool{Bool: v, Valid: true}
+		nb.Bool, nb.Valid = v, true
 		return nil
 	case []byte:
-		b, err := driver.Bool.ConvertValue(v)
-		if err == nil {
-			*nb = Bool{Bool: b.(bool), Valid: true}
-			return nil
-		}
-
-		// *nb = Bool{Bool: false, iv: false}
-		// return nil
+		return nb.UnmarshalJSON(v)
 	case string:
-		b, err := parseBool(v)
-		if err != nil {
-			*nb = Bool{Bool: false, Valid: false}
-			return nil
+		var err error
+		nb.Bool, err = parseBool(v)
+		nb.Valid = err == nil
+		return err
+	case int, uint, int8, uint8, int16, uint16, int32, uint32, int64, uint64:
+		switch v {
+		case int(0), uint(0), int8(0), uint8(0), int16(0), uint16(0), int32(0), uint32(0), int64(0), uint64(0):
+			nb.Bool, nb.Valid = false, true
+		case int(1), uint(1), int8(1), uint8(1), int16(1), uint16(1), int32(1), uint32(1), int64(1), uint64(1):
+			nb.Bool, nb.Valid = true, true
+		default:
+			nb.Bool, nb.Valid = false, false
 		}
 
-		*nb = Bool{Bool: b, Valid: true}
 		return nil
-	case int, int8, int16, int32, int64:
-		i, ok := v.(int)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
-		}
-		i8, ok := v.(int8)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i8 == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i8 == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
-		}
-		i16, ok := v.(int16)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i16 == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i16 == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
-		}
-		i32, ok := v.(int32)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i32 == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i32 == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
-		}
-		i64, ok := v.(int64)
-		if ok {
-			*nb = Bool{Bool: false, Valid: false}
-			if i64 == 0 {
-				*nb = Bool{Bool: false, Valid: true}
-			}
-			if i64 == 1 {
-				*nb = Bool{Bool: true, Valid: true}
-			}
-
-			return nil
-		}
 	}
 
-	return fmt.Errorf("unsupported Scan, storing driver.va type %T into type %T", value, nb)
+	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nb}
 }
 
 // va implements the driver Valuer interface.
@@ -128,22 +65,32 @@ func (nb Bool) Value() (driver.Value, error) {
 
 // MarshalJSON correctly serializes a Bool to JSON
 func (nb Bool) MarshalJSON() ([]byte, error) {
-	if nb.Valid {
-		return json.Marshal(nb.Bool)
+	if !nb.Valid {
+		return structs.NullString, nil
 	}
-	return structs.NullString, nil
+
+	if nb.Bool {
+		return encoder.StringToBytes("true"), nil
+	}
+
+	return encoder.StringToBytes("false"), nil
 }
 
-func (nb *Bool) UnmarshalJSON(b []byte) (err error) {
-	s := strings.Trim(string(b), "\"")
-	// Ignore null, like in the main JSON package.
-	if s == "null" {
-		nb.Bool = false
-		return
+func (nb *Bool) UnmarshalJSON(b []byte) error {
+	var bo bool
+	dec := &decoder.Decoder{}
+	dec.Length = len(b)
+	dec.Data = b
+	err := dec.DecodeBool(&bo)
+	if err != nil {
+		return err
+	}
+	if dec.Err != nil {
+		return dec.Err
 	}
 
-	err = nb.Scan(s)
-	return
+	nb.Bool, nb.Valid = bo, true
+	return nil
 }
 
 // ParseBool returns the boolean va represented by the string.
@@ -156,5 +103,5 @@ func parseBool(str string) (bool, error) {
 	case "0", "f", "F", "false", "FALSE", "False", "na", "N", "NO", "No":
 		return false, nil
 	}
-	return false, errors.New(fmt.Sprintf("Error ParseBool from %s", str))
+	return false, structs.ValueIsNotAcceptable{CheckedValue: str, CheckedType: Bool{}}
 }
