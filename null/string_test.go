@@ -2,10 +2,12 @@ package null
 
 import (
 	"fmt"
-	"github.com/smgladkovskiy/structs/encoder"
-	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/smgladkovskiy/structs/encoder"
 )
 
 func TestNewString(t *testing.T) {

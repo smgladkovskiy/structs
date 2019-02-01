@@ -57,15 +57,9 @@ func (t *Time) Scan(value interface{}) error {
 		}
 		t.Time = v.Time
 
-		*t = Time{Time: v}
-
 		return nil
 	case Time:
 		*t = v
-
-		return nil
-	case *Time:
-		*t = *v
 
 		return nil
 	}

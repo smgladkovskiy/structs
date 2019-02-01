@@ -8,13 +8,13 @@ race: ## Run data race detector
 	@go test -race ./...
 
 test: ## Run application unit tests with coverage and generate global code coverage report
-	@go test ./... -parallel 4 -failfast -cover -coverprofile=coverage.out -bench=. -benchmem
+	@go test ./... -parallel 4 -failfast -cover -coverprofile=.test_artifacts/coverage.out -bench=. -benchmem
 
 covercli: ## Generate code coverage report
-	@go tool cover -func=coverage.out
+	@go tool cover -func=.test_artifacts/coverage.out
 
 coverhtml: ## Generate global code coverage report in HTML
-	@go tool cover -html=coverage.out
+	@go tool cover -html=.test_artifacts/coverage.out
 
 coverage: test coverhtml
 

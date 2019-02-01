@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/francoispqt/gojay"
-
 	"github.com/smgladkovskiy/structs"
 )
 
@@ -125,31 +123,17 @@ func (ni Int64) MarshalJSON() ([]byte, error) {
 	return result, nil
 }
 
-// func (ni *Int64) UnmarshalJSON(b []byte) (err error) {
-// 	s := strings.Trim(string(b), "\"")
-// 	// Ignore null, like in the main JSON package.
-// 	if s == "null" {
-// 		ni.Int64 = 0
-// 		return
-// 	}
-//
-// 	ni.Int64, err = strconv.ParseInt(s, 10, 64)
-// 	if err == nil {
-// 		ni.Valid = true
-// 	}
-// 	return
-// }
-
-func (ni *Int64) UnmarshalJSON(b []byte) error {
-	if string(b) == "null" {
-		return nil
+func (ni *Int64) UnmarshalJSON(b []byte) (err error) {
+	s := strings.Trim(string(b), "\"")
+	// Ignore null, like in the main JSON package.
+	if s == "null" {
+		ni.Int64 = 0
+		return
 	}
 
-	var i int64
-	dec := gojay.NewDecoder(strings.NewReader(string(b)))
-	defer dec.Release()
-	err := dec.DecodeInt64(&i)
-
-	ni.Int64, ni.Valid = i, err == nil
-	return err
+	ni.Int64, err = strconv.ParseInt(s, 10, 64)
+	if err == nil {
+		ni.Valid = true
+	}
+	return
 }

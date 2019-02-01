@@ -187,7 +187,7 @@ func TestInt64_UnmarshalJSON(t *testing.T) {
 		assert.Equal(t, int64(0), ni.Int64)
 	})
 	t.Run("Unexpected value case", func(t *testing.T) {
-		ti := "1.1"
+		ti := "2001-05-03"
 		var ni Int64
 		err := ni.UnmarshalJSON([]byte(ti))
 		if !assert.Error(t, err) {
