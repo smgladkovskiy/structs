@@ -131,7 +131,7 @@ func TestInt64_MarshalJSON(t *testing.T) {
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		b, _ := json.Marshal(1)
+		b, _ := json.Marshal(int64(1))
 		jb, err := ni.MarshalJSON()
 		if !assert.NoError(t, err) {
 			t.FailNow()
