@@ -1,8 +1,10 @@
 package null
 
 import (
-	"github.com/stretchr/testify/assert"
+	"log"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -14,12 +16,20 @@ var (
 func TestNewFloat64(t *testing.T) {
 	t.Run("success NewFloat64", func(t *testing.T) {
 		i := float64(1.01)
-		nf := NewFloat64(i, 2)
+		nf, err := NewFloat64(i, 2)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		assert.True(t, nf.Valid)
 		assert.Equal(t, i, nf.Float64)
 	})
 	t.Run("error NewFloat64", func(t *testing.T) {
-		nf := NewFloat64(wrongFloat, 2)
+		nf, err := NewFloat64(wrongFloat, 2)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		assert.False(t, nf.Valid)
 		assert.Equal(t, float64(0), nf.Float64)
 	})
@@ -28,12 +38,18 @@ func TestNewFloat64(t *testing.T) {
 func TestFloat64_Value(t *testing.T) {
 	t.Run("Actual value case", func(t *testing.T) {
 		i := float64(1)
-		nf := NewFloat64(i, 2)
+		nf, err := NewFloat64(i, 2)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		value, _ := nf.Value()
 		assert.Equal(t, i, value)
 	})
 	t.Run("nil value case", func(t *testing.T) {
-		nf := NewFloat64(nullBytes, 2)
+		nf, err := NewFloat64(nullBytes, 2)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		value, _ := nf.Value()
 		assert.Nil(t, value)
 	})
@@ -195,7 +211,11 @@ func TestFloat64_Scan(t *testing.T) {
 func TestFloat64_MarshalJSON(t *testing.T) {
 	t.Run("success float case", func(*testing.T) {
 		val := float64(1.01)
-		nf := NewFloat64(val, 2)
+		nf, err := NewFloat64(val, 2)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+
 		bt, err := nf.MarshalJSON()
 		if err != nil {
 			t.Error(err)
@@ -204,7 +224,11 @@ func TestFloat64_MarshalJSON(t *testing.T) {
 	})
 	t.Run("success int case", func(*testing.T) {
 		val := int(1)
-		nf := NewFloat64(val, 2)
+		nf, err := NewFloat64(val, 2)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+
 		bt, err := nf.MarshalJSON()
 		if err != nil {
 			t.Error(err)
@@ -213,7 +237,11 @@ func TestFloat64_MarshalJSON(t *testing.T) {
 	})
 	t.Run("success string case", func(*testing.T) {
 		val := "1.01"
-		nf := NewFloat64(val, 2)
+		nf, err := NewFloat64(val, 2)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+
 		bt, err := nf.MarshalJSON()
 		if err != nil {
 			t.Error(err)
@@ -222,7 +250,10 @@ func TestFloat64_MarshalJSON(t *testing.T) {
 	})
 	t.Run("null case", func(*testing.T) {
 		val := int(0)
-		nf := NewFloat64(val, 2)
+		nf, err := NewFloat64(val, 2)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
 		bt, err := nf.MarshalJSON()
 		if err != nil {
 			t.Error(err)
@@ -230,7 +261,11 @@ func TestFloat64_MarshalJSON(t *testing.T) {
 		assert.Equal(t, nullBytes, bt)
 	})
 	t.Run("test precision", func(t *testing.T) {
-		nf := NewFloat64(1, 3)
+		nf, err := NewFloat64(1, 3)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+
 		b, err := nf.MarshalJSON()
 		if err != nil {
 			t.Error(err)

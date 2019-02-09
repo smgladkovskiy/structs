@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -15,13 +14,11 @@ type Float64 struct {
 	Precision int
 }
 
-func NewFloat64(value interface{}, prc int) *Float64 {
+func NewFloat64(value interface{}, prc int) (*Float64, error) {
 	var nf Float64
 	nf.Precision = prc
-	if err := nf.Scan(value); err != nil {
-		log.Print(err)
-	}
-	return &nf
+	err := nf.Scan(value)
+	return &nf, err
 }
 
 func (nf *Float64) Scan(value interface{}) (err error) {
