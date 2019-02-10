@@ -132,8 +132,6 @@ func (ni *Int64) UnmarshalJSON(b []byte) (err error) {
 	}
 
 	ni.Int64, err = strconv.ParseInt(s, 10, 64)
-	if err == nil {
-		ni.Valid = true
-	}
-	return
+	ni.Valid = err == nil
+	return err
 }

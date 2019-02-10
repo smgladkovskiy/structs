@@ -1,9 +1,7 @@
 package null
 
 import (
-	"bytes"
 	"database/sql/driver"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -136,34 +134,26 @@ func (nf *Float64) Value() (driver.Value, error) {
 	return nf.Float64, nil
 }
 
-func (nf *Float64) UnmarshalJSON(data []byte) (err error) {
-	var (
-		val   float64
-		valid bool
-	)
-	str := strings.Replace(string(data), `"`, "", -1)
-	if str == "null" || str == "" {
-		valid = false
-		nf.Float64, nf.Valid = val, valid
-		return
+func (nf *Float64) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+	//str := strings.Replace(string(data), `"`, "", -1)
+	if s == "null" || s == "" {
+		nf.Float64, nf.Valid = 0.0, false
+		return nil
 	}
-	if v, err := strconv.ParseFloat(str, 64); err != nil {
-		return err
-	} else {
-		val, valid = v, true
-	}
-
-	nf.Float64, nf.Valid = val, valid
-	return
+	var err error
+	nf.Float64, err = strconv.ParseFloat(s, 64)
+	nf.Valid = err == nil
+	return err
 }
 
 func (nf Float64) MarshalJSON() ([]byte, error) {
-	var buffer bytes.Buffer
-	prc := strconv.Itoa(nf.Precision)
-	if nf.Valid {
-		buffer.WriteString(fmt.Sprintf(`%.`+prc+`f`, nf.Float64))
-	} else {
-		buffer.WriteString("null")
+	if !nf.Valid {
+		return structs.NullString, nil
 	}
-	return buffer.Bytes(), nil
+
+	var b []byte
+	b = strconv.AppendFloat(b, nf.Float64, 'f', nf.Precision, 64)
+
+	return b, nil
 }
