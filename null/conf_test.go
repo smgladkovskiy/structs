@@ -56,6 +56,17 @@ func checkCases(cases TestCases, t *testing.T, valType interface{}, args ...inte
 
 				assert.Equal(t, testCase[va], ni.Int64, assertForValueMsg, block, caseName, testCase[in], testCase[va])
 				assert.Equal(t, testCase[iv], ni.Valid, assertForValidMsg, block, caseName, testCase[in], testCase[iv])
+			case Float64:
+				var nf Float64
+				err := nf.Scan(testCase[in])
+
+				if testCase[ie].(bool) {
+					assert.Error(t, err, errorForErrorMsg, block, caseName, testCase[in], testCase[va])
+					break
+				}
+
+				assert.Equal(t, testCase[va], nf.Float64, assertForValueMsg, block, caseName, testCase[in], testCase[va])
+				assert.Equal(t, testCase[iv], nf.Valid, assertForValidMsg, block, caseName, testCase[in], testCase[iv])
 			case Bool:
 				var nb Bool
 				err := nb.Scan(testCase[in])
