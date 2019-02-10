@@ -38,7 +38,6 @@ func BenchmarkNewInt64(b *testing.B) {
 }
 
 func TestInt64_Scan(t *testing.T) {
-	// enc := &encoder.Encoder{}
 	ni, _ := NewInt64(1)
 
 	cases := TestCases{

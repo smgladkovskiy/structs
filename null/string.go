@@ -3,12 +3,13 @@ package null
 import (
 	"database/sql/driver"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/smgladkovskiy/structs"
 	"github.com/smgladkovskiy/structs/decoder"
 	"github.com/smgladkovskiy/structs/encoder"
 	"github.com/smgladkovskiy/structs/zero"
-	"strconv"
-	"time"
 )
 
 // String Реализация String
