@@ -76,7 +76,7 @@ func (nt Time) Value() (driver.Value, error) {
 	return nt.Time, nil
 }
 
-func (nt *Time) MarshalJSON() ([]byte, error) {
+func (nt Time) MarshalJSON() ([]byte, error) {
 	if !nt.Valid {
 		return structs.NullString, nil
 	}

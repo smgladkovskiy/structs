@@ -127,11 +127,22 @@ func (nf *Float64) Scan(value interface{}) error {
 	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nf}
 }
 
-func (nf *Float64) Value() (driver.Value, error) {
+func (nf Float64) Value() (driver.Value, error) {
 	if !nf.Valid {
 		return nil, nil
 	}
 	return nf.Float64, nil
+}
+
+func (nf Float64) MarshalJSON() ([]byte, error) {
+	if !nf.Valid {
+		return structs.NullString, nil
+	}
+
+	var b []byte
+	b = strconv.AppendFloat(b, nf.Float64, 'f', nf.Precision, 64)
+
+	return b, nil
 }
 
 func (nf *Float64) UnmarshalJSON(b []byte) error {
@@ -145,15 +156,4 @@ func (nf *Float64) UnmarshalJSON(b []byte) error {
 	nf.Float64, err = strconv.ParseFloat(s, 64)
 	nf.Valid = err == nil
 	return err
-}
-
-func (nf Float64) MarshalJSON() ([]byte, error) {
-	if !nf.Valid {
-		return structs.NullString, nil
-	}
-
-	var b []byte
-	b = strconv.AppendFloat(b, nf.Float64, 'f', nf.Precision, 64)
-
-	return b, nil
 }

@@ -3,8 +3,9 @@ package null
 import (
 	"database/sql/driver"
 	"errors"
-	"github.com/smgladkovskiy/structs"
 	"time"
+
+	"github.com/smgladkovskiy/structs"
 )
 
 type Date struct {
@@ -60,15 +61,6 @@ func (nd Date) Value() (driver.Value, error) {
 	return nd.Time, nil
 }
 
-func (nd *Date) UnmarshalJSON(b []byte) (err error) {
-	if string(b) == "null" {
-		return
-	}
-	nd.Time, err = time.Parse(structs.DateFormat(), string(b))
-	nd.Valid = err == nil
-	return
-}
-
 func (nd Date) MarshalJSON() ([]byte, error) {
 	if !nd.Valid {
 		return structs.NullString, nil
@@ -84,4 +76,13 @@ func (nd Date) MarshalJSON() ([]byte, error) {
 	b = nd.Time.AppendFormat(b, structs.DateFormat())
 	b = append(b, '"')
 	return b, nil
+}
+
+func (nd *Date) UnmarshalJSON(b []byte) (err error) {
+	if string(b) == "null" {
+		return
+	}
+	nd.Time, err = time.Parse(structs.DateFormat(), string(b))
+	nd.Valid = err == nil
+	return
 }
