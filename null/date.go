@@ -3,6 +3,7 @@ package null
 import (
 	"database/sql/driver"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/smgladkovskiy/structs"
@@ -79,10 +80,12 @@ func (nd Date) MarshalJSON() ([]byte, error) {
 }
 
 func (nd *Date) UnmarshalJSON(b []byte) (err error) {
-	if string(b) == "null" {
+	s := strings.Trim(string(b), "\"")
+	if s == "null" {
+		nd.Valid = false
 		return
 	}
-	nd.Time, err = time.Parse(structs.DateFormat(), string(b))
+	nd.Time, err = time.Parse(structs.DateFormat(), s)
 	nd.Valid = err == nil
 	return
 }
