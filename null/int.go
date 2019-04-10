@@ -107,20 +107,14 @@ func (ni Int64) Value() (driver.Value, error) {
 }
 
 // MarshalJSON correctly serializes a Int64 to JSON
-func (ni Int64) MarshalJSON() ([]byte, error) {
+func (ni Int64) MarshalJSON() (b []byte, err error) {
 	if !ni.Valid {
-		return structs.NullString, nil
+		b = structs.NullString
+		return
 	}
-	HEX := []byte("0123456789ABCDEF")
-	result := make([]byte, 0, 16)
-	for ni.Int64 != 0 {
-		nibble := ni.Int64 & 0x0F
-		c := HEX[nibble]
-		// not optimal code here?
-		result = append(result, c)
-		ni.Int64 = ni.Int64 >> 4
-	}
-	return result, nil
+
+	b = strconv.AppendInt(b, ni.Int64, 10)
+	return
 }
 
 func (ni *Int64) UnmarshalJSON(b []byte) (err error) {
@@ -130,7 +124,6 @@ func (ni *Int64) UnmarshalJSON(b []byte) (err error) {
 		ni.Int64 = 0
 		return
 	}
-
 	ni.Int64, err = strconv.ParseInt(s, 10, 64)
 	ni.Valid = err == nil
 	return err
