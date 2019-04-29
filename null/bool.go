@@ -2,6 +2,8 @@ package null
 
 import (
 	"database/sql/driver"
+	"strings"
+
 	"github.com/smgladkovskiy/structs"
 	"github.com/smgladkovskiy/structs/decoder"
 	"github.com/smgladkovskiy/structs/encoder"
@@ -31,6 +33,8 @@ func (nb *Bool) Scan(value interface{}) error {
 		return nil
 	case bool:
 		nb.Bool, nb.Valid = v, true
+	case *bool:
+		nb.Bool, nb.Valid = *v, true
 		return nil
 	case []byte:
 		return nb.UnmarshalJSON(v)
@@ -77,6 +81,12 @@ func (nb Bool) MarshalJSON() ([]byte, error) {
 }
 
 func (nb *Bool) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+	if s == "null" {
+		nb.Valid = false
+		return nil
+	}
+
 	var bo bool
 	dec := &decoder.Decoder{}
 	dec.Length = len(b)

@@ -195,10 +195,9 @@ func BenchmarkBool_MarshalJSON(b *testing.B) {
 func TestBool_UnmarshalJSON(t *testing.T) {
 	cases := TestCases{
 		"bools": {
-			// {in: makeBytes(true), va: true, iv: true, ie: false},
-			// {in: makeBytes(false), va: false, iv: true, ie: false},
 			{in: encoder.StringToBytes("false"), va: false, iv: true, ie: false},
 			{in: encoder.StringToBytes("true"), va: true, iv: true, ie: false},
+			{in: encoder.StringToBytes("null"), va: false, iv: false, ie: false},
 		},
 		"error": {
 			{in: encoder.StringToBytes("t"), va: false, iv: false, ie: true},
