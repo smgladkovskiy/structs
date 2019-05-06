@@ -42,46 +42,46 @@ func TestInt64_Scan(t *testing.T) {
 
 	cases := TestCases{
 		"ints": {
-			{in: 1, va: int64(1), iv: true, ie: false},
-			{in: int8(1), va: int64(1), iv: true, ie: false},
-			{in: int16(1), va: int64(1), iv: true, ie: false},
-			{in: int32(1), va: int64(1), iv: true, ie: false},
-			{in: int64(1), va: int64(1), iv: true, ie: false},
-			{in: uint8(1), va: int64(1), iv: true, ie: false},
-			{in: uint16(1), va: int64(1), iv: true, ie: false},
-			{in: uint32(1), va: int64(1), iv: true, ie: false},
-			{in: uint64(1), va: int64(1), iv: true, ie: false},
-			{in: 0, va: int64(0), iv: true, ie: false},
-			{in: int8(0), va: int64(0), iv: true, ie: false},
-			{in: int16(0), va: int64(0), iv: true, ie: false},
-			{in: int32(0), va: int64(0), iv: true, ie: false},
-			{in: int64(0), va: int64(0), iv: true, ie: false},
-			{in: uint8(0), va: int64(0), iv: true, ie: false},
-			{in: uint16(0), va: int64(0), iv: true, ie: false},
-			{in: uint32(0), va: int64(0), iv: true, ie: false},
-			{in: uint64(0), va: int64(0), iv: true, ie: false},
-			{in: -1, va: int64(-1), iv: true, ie: false},
-			{in: int8(-1), va: int64(-1), iv: true, ie: false},
-			{in: int16(-1), va: int64(-1), iv: true, ie: false},
-			{in: int32(-1), va: int64(-1), iv: true, ie: false},
-			{in: int64(-1), va: int64(-1), iv: true, ie: false},
-			{in: ni, va: int64(1), iv: true, ie: false},
+			{input: 1, expected: int64(1), isValid: true, isError: false},
+			{input: int8(1), expected: int64(1), isValid: true, isError: false},
+			{input: int16(1), expected: int64(1), isValid: true, isError: false},
+			{input: int32(1), expected: int64(1), isValid: true, isError: false},
+			{input: int64(1), expected: int64(1), isValid: true, isError: false},
+			{input: uint8(1), expected: int64(1), isValid: true, isError: false},
+			{input: uint16(1), expected: int64(1), isValid: true, isError: false},
+			{input: uint32(1), expected: int64(1), isValid: true, isError: false},
+			{input: uint64(1), expected: int64(1), isValid: true, isError: false},
+			{input: 0, expected: int64(0), isValid: true, isError: false},
+			{input: int8(0), expected: int64(0), isValid: true, isError: false},
+			{input: int16(0), expected: int64(0), isValid: true, isError: false},
+			{input: int32(0), expected: int64(0), isValid: true, isError: false},
+			{input: int64(0), expected: int64(0), isValid: true, isError: false},
+			{input: uint8(0), expected: int64(0), isValid: true, isError: false},
+			{input: uint16(0), expected: int64(0), isValid: true, isError: false},
+			{input: uint32(0), expected: int64(0), isValid: true, isError: false},
+			{input: uint64(0), expected: int64(0), isValid: true, isError: false},
+			{input: -1, expected: int64(-1), isValid: true, isError: false},
+			{input: int8(-1), expected: int64(-1), isValid: true, isError: false},
+			{input: int16(-1), expected: int64(-1), isValid: true, isError: false},
+			{input: int32(-1), expected: int64(-1), isValid: true, isError: false},
+			{input: int64(-1), expected: int64(-1), isValid: true, isError: false},
+			{input: ni, expected: int64(1), isValid: true, isError: false},
 		},
 		"bytes slice": {
-			{in: makeBytes(int64(1)), va: int64(1), iv: true, ie: false},
-			{in: makeBytes(int64(0)), va: int64(0), iv: true, ie: false},
-			{in: makeBytes(int64(-1)), va: int64(-1), iv: true, ie: false},
+			{input: makeBytes(int64(1)), expected: int64(1), isValid: true, isError: false},
+			{input: makeBytes(int64(0)), expected: int64(0), isValid: true, isError: false},
+			{input: makeBytes(int64(-1)), expected: int64(-1), isValid: true, isError: false},
 		},
 		"strings": {
-			{in: "1", va: int64(1), iv: true, ie: false},
-			{in: "0", va: int64(0), iv: true, ie: false},
-			{in: "-1", va: int64(-1), iv: true, ie: false},
+			{input: "1", expected: int64(1), isValid: true, isError: false},
+			{input: "0", expected: int64(0), isValid: true, isError: false},
+			{input: "-1", expected: int64(-1), isValid: true, isError: false},
 		},
 		"null": {
-			{in: nil, va: int64(0), iv: false, ie: false},
+			{input: nil, expected: int64(0), isValid: false, isError: false},
 		},
 		"errors": {
-			{in: true, va: 0, iv: false, ie: true},
+			{input: true, expected: 0, isValid: false, isError: true},
 		},
 	}
 	checkCases(cases, t, Int64{}, ni)
@@ -98,7 +98,7 @@ func BenchmarkInt64_Scan(b *testing.B) {
 }
 
 func TestInt64_Value(t *testing.T) {
-	t.Run("Return va", func(t *testing.T) {
+	t.Run("Return value", func(t *testing.T) {
 		i := int64(1)
 		ni, err := NewInt64(i)
 		if !assert.NoError(t, err) {
@@ -107,7 +107,7 @@ func TestInt64_Value(t *testing.T) {
 		value, _ := ni.Value()
 		assert.Equal(t, i, value)
 	})
-	t.Run("Return nil va", func(t *testing.T) {
+	t.Run("Return nil value", func(t *testing.T) {
 		var ni Int64
 		value, _ := ni.Value()
 		assert.Nil(t, value)

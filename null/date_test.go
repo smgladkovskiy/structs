@@ -1,10 +1,11 @@
 package null
 
 import (
-	"github.com/smgladkovskiy/structs"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/smgladkovskiy/structs"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -44,21 +45,21 @@ func TestDate_Scan(t *testing.T) {
 	nd, _ := NewDate(tn)
 	cases := TestCases{
 		"times": {
-			{na: "time", in: tn, va: tn, iv: true, ie: false},
-			{na: "*time", in: &tn, va: tn, iv: true, ie: false},
-			{na: "zero time", in: time.Time{}, va: time.Time{}, iv: false, ie: false},
-			{na: "zero *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
-			{na: "Date", in: nd, va: tn, iv: true, ie: false},
+			{name: "time", input: tn, expected: tn, isValid: true, isError: false},
+			{name: "*time", input: &tn, expected: tn, isValid: true, isError: false},
+			{name: "zero time", input: time.Time{}, expected: time.Time{}, isValid: false, isError: false},
+			{name: "zero *time", input: &time.Time{}, expected: time.Time{}, isValid: false, isError: false},
+			{name: "Date", input: nd, expected: tn, isValid: true, isError: false},
 		},
 		"string": {
-			{na: "string good format", in: tn.Format(structs.DateFormat()), va: tn.Format(structs.DateFormat()), iv: true, ie: false},
+			{name: "string good format", input: tn.Format(structs.DateFormat()), expected: tn.Format(structs.DateFormat()), isValid: true, isError: false},
 		},
 		"nil": {
-			{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
+			{name: "nil", input: nil, expected: time.Time{}, isValid: false, isError: false},
 		},
 		"error": {
-			{na: "string bad format", in: tn.Format(time.ANSIC), va: time.Time{}, iv: false, ie: true},
-			{na: "error", in: false, va: time.Time{}, iv: false, ie: true},
+			{name: "string bad format", input: tn.Format(time.ANSIC), expected: time.Time{}, isValid: false, isError: true},
+			{name: "error", input: false, expected: time.Time{}, isValid: false, isError: true},
 		},
 	}
 	checkCases(cases, t, Date{}, tn)
@@ -76,7 +77,7 @@ func BenchmarkDate_Scan(b *testing.B) {
 }
 
 func TestDate_Value(t *testing.T) {
-	t.Run("Return va", func(t *testing.T) {
+	t.Run("Return value", func(t *testing.T) {
 		ti := time.Now()
 		nd, err := NewDate(ti)
 		if !assert.NoError(t, err) {
@@ -85,7 +86,7 @@ func TestDate_Value(t *testing.T) {
 		value, _ := nd.Value()
 		assert.Equal(t, ti, value)
 	})
-	t.Run("Return nil va", func(t *testing.T) {
+	t.Run("Return nil value", func(t *testing.T) {
 		var nd Date
 		value, _ := nd.Value()
 		assert.Nil(t, value)

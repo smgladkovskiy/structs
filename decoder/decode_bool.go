@@ -11,6 +11,22 @@ func (dec *Decoder) DecodeBool(v *bool) error {
 		case '0':
 			*v = false
 			return nil
+		case 'y', 'Y':
+			dec.cursor++
+			err := dec.assertYes()
+			if err != nil {
+				return err
+			}
+			*v = true
+			return nil
+		case 'n', 'N':
+			dec.cursor++
+			err := dec.assertNo()
+			if err != nil {
+				return err
+			}
+			*v = false
+			return nil
 		case 't':
 			dec.cursor++
 			err := dec.assertTrue()
@@ -71,6 +87,35 @@ func (dec *Decoder) assertTrue() error {
 	}
 	return dec.raiseInvalidJSONErr(dec.cursor)
 }
+func (dec *Decoder) assertYes() error {
+	i := 0
+	for ; dec.cursor < dec.Length || dec.read(); dec.cursor++ {
+		switch i {
+		case 0:
+			if dec.Data[dec.cursor] != 'e' && dec.Data[dec.cursor] != 'E' {
+				return dec.raiseInvalidJSONErr(dec.cursor)
+			}
+		case 1:
+			if dec.Data[dec.cursor] != 's' && dec.Data[dec.cursor] != 'S' {
+				return dec.raiseInvalidJSONErr(dec.cursor)
+			}
+		case 2:
+			switch dec.Data[dec.cursor] {
+			case ' ', '\b', '\t', '\n', ',', ']', '}', '"':
+				// dec.cursor--
+				return nil
+			default:
+				return dec.raiseInvalidJSONErr(dec.cursor)
+			}
+		}
+		i++
+	}
+	if i == 2 || i == 0 {
+		return nil
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+
 func (dec *Decoder) skipData() error {
 	for ; dec.cursor < dec.Length || dec.read(); dec.cursor++ {
 		switch dec.Data[dec.cursor] {
@@ -158,6 +203,31 @@ func (dec *Decoder) assertFalse() error {
 		i++
 	}
 	if i == 4 {
+		return nil
+	}
+	return dec.raiseInvalidJSONErr(dec.cursor)
+}
+
+func (dec *Decoder) assertNo() error {
+	i := 0
+	for ; dec.cursor < dec.Length || dec.read(); dec.cursor++ {
+		switch i {
+		case 0:
+			if dec.Data[dec.cursor] != 'o' && dec.Data[dec.cursor] != 'O' {
+				return dec.raiseInvalidJSONErr(dec.cursor)
+			}
+		case 1:
+			switch dec.Data[dec.cursor] {
+			case ' ', '\t', '\n', ',', ']', '}', '"':
+				// dec.cursor--
+				return nil
+			default:
+				return dec.raiseInvalidJSONErr(dec.cursor)
+			}
+		}
+		i++
+	}
+	if i == 1 || i == 0 {
 		return nil
 	}
 	return dec.raiseInvalidJSONErr(dec.cursor)

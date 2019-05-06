@@ -98,7 +98,7 @@ func (ni *Int64) Scan(value interface{}) error {
 	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: ni}
 }
 
-// va implements the driver Valuer interface.
+// Value implements the driver Valuer interface.
 func (ni Int64) Value() (driver.Value, error) {
 	if !ni.Valid {
 		return nil, nil

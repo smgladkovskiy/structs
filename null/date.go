@@ -11,7 +11,7 @@ import (
 
 type Date struct {
 	Time  time.Time
-	Valid bool // iv is true if Time is not NULL
+	Valid bool // is true if Time is not NULL
 }
 
 // NewDate Создание Date переменной
@@ -54,7 +54,7 @@ func (nd *Date) Scan(value interface{}) error {
 	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nd}
 }
 
-// va implements the driver Valuer interface.
+// Value implements the driver Valuer interface.
 func (nd Date) Value() (driver.Value, error) {
 	if !nd.Valid {
 		return nil, nil

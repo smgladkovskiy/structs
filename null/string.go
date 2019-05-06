@@ -15,7 +15,7 @@ import (
 // String Реализация String
 type String struct {
 	String string
-	Valid  bool // iv is true if String is not NULL
+	Valid  bool // is true if String is not NULL
 }
 
 // NewStringf Создание String переменной по текстовому формату с аргументами
@@ -125,7 +125,7 @@ func (ns *String) Scan(value interface{}) error {
 	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: ns}
 }
 
-// va implements the driver Valuer interface.
+// Value implements the driver Valuer interface.
 func (ns String) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
@@ -145,27 +145,27 @@ func (ns String) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalJSON correctly serializes a String to JSON
-func (ns *String) UnmarshalJSON(b []byte) (err error) {
+func (ns *String) UnmarshalJSON(b []byte) error {
 	if b == nil {
-		return
+		return nil
 	}
 
 	var str string
 	dec := &decoder.Decoder{}
 	dec.Length = len(b)
 	dec.Data = b
-	err = dec.DecodeString(&str)
+	err := dec.DecodeString(&str)
 	if err != nil {
 		return err
 	}
 
 	// // Ignore null, like in the main JSON package.
 	if &str == nil {
-		return
+		return nil
 	}
 
-	ns.String, ns.Valid = str, err == nil
-	return
+	ns.String, ns.Valid = str, true
+	return nil
 }
 
 func trim(s1 string, s2 []byte) string {

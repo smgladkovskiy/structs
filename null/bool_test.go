@@ -43,7 +43,7 @@ func BenchmarkNewBool(b *testing.B) {
 
 func TestBool_Value(t *testing.T) {
 	t.Parallel()
-	t.Run("Return bool va", func(t *testing.T) {
+	t.Run("Return bool value", func(t *testing.T) {
 		nullBool, err := NewBool(true)
 		if !assert.NoError(t, err) {
 			t.FailNow()
@@ -55,7 +55,7 @@ func TestBool_Value(t *testing.T) {
 
 		assert.Equal(t, true, value)
 	})
-	t.Run("Return nil va", func(t *testing.T) {
+	t.Run("Return nil value", func(t *testing.T) {
 		var nullBool Bool
 		value, _ := nullBool.Value()
 
@@ -77,69 +77,75 @@ func TestBool_Scan(t *testing.T) {
 	nb1, _ := NewBool(true)
 	nb2, _ := NewBool(false)
 	nb3, _ := NewBool(nil)
-	nb4, _ := NewBool(1)
-	nb5, _ := NewBool(0)
 	cases := TestCases{
 		"ints": {
-			{in: 1, va: true, iv: true, ie: false},
-			{in: int8(1), va: true, iv: true, ie: false},
-			{in: int16(1), va: true, iv: true, ie: false},
-			{in: int32(1), va: true, iv: true, ie: false},
-			{in: int64(1), va: true, iv: true, ie: false},
+			{input: 1, expected: true, isValid: true, isError: false},
+			{input: int8(1), expected: true, isValid: true, isError: false},
+			{input: int16(1), expected: true, isValid: true, isError: false},
+			{input: int32(1), expected: true, isValid: true, isError: false},
+			{input: int64(1), expected: true, isValid: true, isError: false},
 
-			{in: 0, va: false, iv: true, ie: false},
-			{in: int8(0), va: false, iv: true, ie: false},
-			{in: int16(0), va: false, iv: true, ie: false},
-			{in: int32(0), va: false, iv: true, ie: false},
-			{in: int64(0), va: false, iv: true, ie: false},
+			{input: 0, expected: false, isValid: true, isError: false},
+			{input: int8(0), expected: false, isValid: true, isError: false},
+			{input: int16(0), expected: false, isValid: true, isError: false},
+			{input: int32(0), expected: false, isValid: true, isError: false},
+			{input: int64(0), expected: false, isValid: true, isError: false},
 
-			{in: 5, va: false, iv: false, ie: false},
-			{in: -5, va: false, iv: false, ie: false},
+			{input: 5, expected: false, isValid: false, isError: false},
+			{input: -5, expected: false, isValid: false, isError: false},
 		},
 		"strings": {
-			{in: "1", va: true, iv: true, ie: false},
-			{in: "t", va: true, iv: true, ie: false},
-			{in: "T", va: true, iv: true, ie: false},
-			{in: "true", va: true, iv: true, ie: false},
-			{in: "TRUE", va: true, iv: true, ie: false},
-			{in: "True", va: true, iv: true, ie: false},
-			{in: "y", va: true, iv: true, ie: false},
-			{in: "Y", va: true, iv: true, ie: false},
-			{in: "YES", va: true, iv: true, ie: false},
-			{in: "Yes", va: true, iv: true, ie: false},
+			{input: "1", expected: true, isValid: true, isError: false},
+			{input: "t", expected: true, isValid: true, isError: false},
+			{input: "T", expected: true, isValid: true, isError: false},
+			{input: "true", expected: true, isValid: true, isError: false},
+			{input: "TRUE", expected: true, isValid: true, isError: false},
+			{input: "True", expected: true, isValid: true, isError: false},
+			{input: "y", expected: true, isValid: true, isError: false},
+			{input: "Y", expected: true, isValid: true, isError: false},
+			{input: "YES", expected: true, isValid: true, isError: false},
+			{input: "Yes", expected: true, isValid: true, isError: false},
 
-			{in: "0", va: false, iv: true, ie: false},
-			{in: "f", va: false, iv: true, ie: false},
-			{in: "F", va: false, iv: true, ie: false},
-			{in: "false", va: false, iv: true, ie: false},
-			{in: "False", va: false, iv: true, ie: false},
-			{in: "FALSE", va: false, iv: true, ie: false},
-			{in: "na", va: false, iv: true, ie: false},
-			{in: "N", va: false, iv: true, ie: false},
-			{in: "NO", va: false, iv: true, ie: false},
-			{in: "No", va: false, iv: true, ie: false},
-			{in: "some string", va: false, iv: false, ie: false},
+			{input: "0", expected: false, isValid: true, isError: false},
+			{input: "f", expected: false, isValid: true, isError: false},
+			{input: "F", expected: false, isValid: true, isError: false},
+			{input: "false", expected: false, isValid: true, isError: false},
+			{input: "False", expected: false, isValid: true, isError: false},
+			{input: "FALSE", expected: false, isValid: true, isError: false},
+			{input: "n", expected: false, isValid: true, isError: false},
+			{input: "N", expected: false, isValid: true, isError: false},
+			{input: "NO", expected: false, isValid: true, isError: false},
+			{input: "No", expected: false, isValid: true, isError: false},
+			{input: "some string", expected: false, isValid: false, isError: false},
 		},
 
 		"booleans": {
-			{in: true, va: true, iv: true, ie: false},
-			{in: false, va: false, iv: true, ie: false},
-			{in: nb1, va: true, iv: true, ie: false},
-			{in: nb2, va: false, iv: true, ie: false},
-			{in: nb3, va: false, iv: false, ie: false},
-			{in: nb4, va: true, iv: true, ie: false},
-			{in: nb5, va: false, iv: true, ie: false},
+			{input: true, expected: true, isValid: true, isError: false},
+			{input: false, expected: false, isValid: true, isError: false},
+			{input: nb1, expected: true, isValid: true, isError: false},
+			{input: nb2, expected: false, isValid: true, isError: false},
+			{input: nb3, expected: false, isValid: false, isError: false},
 		},
 
 		"byte slice": {
-			{na: "bytes for true", in: []byte("true"), va: true, iv: true, ie: false},
-			{na: "bytes for false", in: []byte("false"), va: false, iv: true, ie: false},
-			{na: "bytes for true", in: encoder.StringToBytes("true"), va: true, iv: true, ie: false},
-			{na: "bytes for false", in: encoder.StringToBytes("false"), va: false, iv: true, ie: false},
-			{na: "bytes for nil", in: []byte("null"), va: false, iv: false, ie: false},
+			{name: "bytes for true", input: []byte("true"), expected: true, isValid: true, isError: false},
+			{name: "bytes for false", input: []byte("false"), expected: false, isValid: true, isError: false},
+			{name: "bytes for true", input: encoder.StringToBytes("true"), expected: true, isValid: true, isError: false},
+			{name: "bytes for false", input: encoder.StringToBytes("false"), expected: false, isValid: true, isError: false},
+			{name: "bytes for nil", input: []byte("null"), expected: false, isValid: false, isError: false},
+			{name: "bytes for yes", input: []byte("yes"), expected: true, isValid: true, isError: false},
+			{name: "bytes for YES", input: []byte("YES"), expected: true, isValid: true, isError: false},
+			{name: "bytes for y", input: []byte("y"), expected: true, isValid: true, isError: false},
+			{name: "bytes for Y", input: []byte("Y"), expected: true, isValid: true, isError: false},
+			{name: "bytes for no", input: []byte("no"), expected: false, isValid: true, isError: false},
+			{name: "bytes for NO", input: []byte("NO"), expected: false, isValid: true, isError: false},
+			{name: "bytes for n", input: []byte("n"), expected: false, isValid: true, isError: false},
+			{name: "bytes for N", input: []byte("N"), expected: false, isValid: true, isError: false},
+			{name: "bytes for 1", input: []byte("1"), expected: true, isValid: true, isError: false},
+			{name: "bytes for 0", input: []byte("0"), expected: false, isValid: true, isError: false},
 		},
 		"nil": {
-			{in: nil, va: false, iv: false, ie: false},
+			{input: nil, expected: false, isValid: false, isError: false},
 		},
 
 		"errors": {},
@@ -199,12 +205,12 @@ func BenchmarkBool_MarshalJSON(b *testing.B) {
 func TestBool_UnmarshalJSON(t *testing.T) {
 	cases := TestCases{
 		"bools": {
-			{in: encoder.StringToBytes("false"), va: false, iv: true, ie: false},
-			{in: encoder.StringToBytes("true"), va: true, iv: true, ie: false},
-			{in: encoder.StringToBytes("null"), va: false, iv: false, ie: false},
+			{input: encoder.StringToBytes("false"), expected: false, isValid: true, isError: false},
+			{input: encoder.StringToBytes("true"), expected: true, isValid: true, isError: false},
+			{input: encoder.StringToBytes("null"), expected: false, isValid: false, isError: false},
 		},
 		"error": {
-			{in: encoder.StringToBytes("t"), va: false, iv: false, ie: true},
+			{input: encoder.StringToBytes("t"), expected: false, isValid: false, isError: true},
 		},
 	}
 	checkUnmarshalCases(t, cases, Bool{})

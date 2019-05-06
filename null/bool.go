@@ -60,7 +60,7 @@ func (nb *Bool) Scan(value interface{}) error {
 	return structs.TypeIsNotAcceptable{CheckedValue: value, CheckedType: nb}
 }
 
-// va implements the driver Valuer interface.
+// Value implements the driver Valuer interface.
 func (nb Bool) Value() (driver.Value, error) {
 	if !nb.Valid {
 		return nil, nil
@@ -104,14 +104,14 @@ func (nb *Bool) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// ParseBool returns the boolean va represented by the string.
+// ParseBool returns the boolean value represented by the string.
 // It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.
-// Any other va returns an error.
+// Any other values returns an error.
 func parseBool(str string) (bool, error) {
 	switch str {
 	case "1", "t", "T", "true", "TRUE", "True", "y", "Y", "YES", "Yes":
 		return true, nil
-	case "0", "f", "F", "false", "FALSE", "False", "na", "N", "NO", "No":
+	case "0", "f", "F", "false", "FALSE", "False", "n", "N", "NO", "No":
 		return false, nil
 	}
 	return false, structs.ValueIsNotAcceptable{CheckedValue: str, CheckedType: Bool{}}

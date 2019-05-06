@@ -1,11 +1,12 @@
 package null
 
 import (
-	"github.com/smgladkovskiy/structs"
-	"github.com/smgladkovskiy/structs/zero"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/smgladkovskiy/structs"
+	"github.com/smgladkovskiy/structs/zero"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -46,21 +47,21 @@ func TestTime_Scan(t *testing.T) {
 	ztn, _ := zero.NewTime(time.Time{})
 	cases := TestCases{
 		"time": {
-			{na: "time", in: ts, va: ts, iv: true, ie: false},
-			{na: "*time", in: &ts, va: ts, iv: true, ie: false},
-			{na: "empty *time", in: &time.Time{}, va: time.Time{}, iv: false, ie: false},
-			{na: "zero.Time", in: ztn, va: time.Time{}, iv: false, ie: false},
-			{na: "null.Time now", in: nt, va: ts, iv: true, ie: false},
+			{name: "time", input: ts, expected: ts, isValid: true, isError: false},
+			{name: "*time", input: &ts, expected: ts, isValid: true, isError: false},
+			{name: "empty *time", input: &time.Time{}, expected: time.Time{}, isValid: false, isError: false},
+			{name: "zero.Time", input: ztn, expected: time.Time{}, isValid: false, isError: false},
+			{name: "null.Time now", input: nt, expected: ts, isValid: true, isError: false},
 		},
 		"strings": {
-			{na: "string good format", in: ts.Format(structs.TimeFormat()), va: ts.Format(structs.TimeFormat()), iv: true, ie: false},
+			{name: "string good format", input: ts.Format(structs.TimeFormat()), expected: ts.Format(structs.TimeFormat()), isValid: true, isError: false},
 		},
 		"nil": {
-			{na: "nil", in: nil, va: time.Time{}, iv: false, ie: false},
+			{name: "nil", input: nil, expected: time.Time{}, isValid: false, isError: false},
 		},
 		"errors": {
-			{na: "bool as input", in: false, va: false, iv: false, ie: true},
-			{na: "bad format", in: ts.Format(time.ANSIC), va: ts, iv: false, ie: true},
+			{name: "bool as input", input: false, expected: false, isValid: false, isError: true},
+			{name: "bad format", input: ts.Format(time.ANSIC), expected: ts, isValid: false, isError: true},
 		},
 	}
 	checkCases(cases, t, Time{}, ts)
@@ -78,7 +79,7 @@ func BenchmarkTime_Scan(b *testing.B) {
 }
 
 func TestTime_Value(t *testing.T) {
-	t.Run("Return va", func(t *testing.T) {
+	t.Run("Return value", func(t *testing.T) {
 		ti := time.Now()
 		nt, err := NewTime(ti)
 		if !assert.NoError(t, err) {
@@ -87,7 +88,7 @@ func TestTime_Value(t *testing.T) {
 		value, _ := nt.Value()
 		assert.Equal(t, ti, value)
 	})
-	t.Run("Return nil va", func(t *testing.T) {
+	t.Run("Return nil value", func(t *testing.T) {
 		var nt Time
 		value, _ := nt.Value()
 		assert.Nil(t, value)
