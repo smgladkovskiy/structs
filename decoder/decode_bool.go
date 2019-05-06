@@ -5,6 +5,12 @@ func (dec *Decoder) DecodeBool(v *bool) error {
 		switch dec.Data[dec.cursor] {
 		case ' ', '\n', '\t', '\r', ',', '"':
 			continue
+		case '1':
+			*v = true
+			return nil
+		case '0':
+			*v = false
+			return nil
 		case 't':
 			dec.cursor++
 			err := dec.assertTrue()

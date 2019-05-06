@@ -77,6 +77,8 @@ func TestBool_Scan(t *testing.T) {
 	nb1, _ := NewBool(true)
 	nb2, _ := NewBool(false)
 	nb3, _ := NewBool(nil)
+	nb4, _ := NewBool(1)
+	nb5, _ := NewBool(0)
 	cases := TestCases{
 		"ints": {
 			{in: 1, va: true, iv: true, ie: false},
@@ -125,6 +127,8 @@ func TestBool_Scan(t *testing.T) {
 			{in: nb1, va: true, iv: true, ie: false},
 			{in: nb2, va: false, iv: true, ie: false},
 			{in: nb3, va: false, iv: false, ie: false},
+			{in: nb4, va: true, iv: true, ie: false},
+			{in: nb5, va: false, iv: true, ie: false},
 		},
 
 		"byte slice": {

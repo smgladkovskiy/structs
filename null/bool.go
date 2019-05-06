@@ -33,6 +33,7 @@ func (nb *Bool) Scan(value interface{}) error {
 		return nil
 	case bool:
 		nb.Bool, nb.Valid = v, true
+		return nil
 	case *bool:
 		nb.Bool, nb.Valid = *v, true
 		return nil
