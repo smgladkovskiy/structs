@@ -1,3 +1,7 @@
+Deprecated
+----------
+This repo was deprecated. I was young, inexperienced, and I was thinking about the wrong thing. I'm sorry. :)
+
 structs
 -------
 
